@@ -1,0 +1,17 @@
+{
+  "name": "agentcheck",
+  "version": "0.1.0",
+  "description": "Behavioral guardrails for AI coding agents — intercepts bad patterns and injects corrections",
+  "main": "src/index.js",
+  "bin": {
+    "agentcheck": "src/cli.js"
+  },
+  "scripts": {
+    "test": "node src/test.js"
+  },
+  "keywords": ["claude", "ai-agent", "coding-agent", "guardrails", "llm"],
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

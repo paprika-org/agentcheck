@@ -1,0 +1,22 @@
+# AgentCheck configuration
+# Copy to .agentcheck.yml in your project root
+
+include_defaults: true  # include built-in rules (default: true)
+
+rules:
+  # Add your team's custom rules here
+
+  # Example: enforce ticket numbers for TODOs
+  # - pattern: "TODO(?!.*#\\d+)"
+  #   inject: "Add a ticket number to this TODO (e.g. # TODO(#123))."
+  #   cooldown: 30
+
+  # Example: prevent "works on my machine" excuses
+  # - pattern: "works on my machine"
+  #   inject: "Document the environment difference and fix it properly."
+  #   cooldown: 60
+
+  # Example: prevent hardcoded credentials
+  # - pattern: "(password|secret|api_key)\\s*=\\s*['\"].+['\"]"
+  #   inject: "STOP. Do not hardcode credentials. Use environment variables."
+  #   cooldown: 30

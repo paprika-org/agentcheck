@@ -1,0 +1,36 @@
+# AgentCheck Rule Pack: protect-git
+# Prevents destructive git operations that are hard to undo.
+# Use with: agentcheck --config rules/protect-git.yaml -- claude
+
+include_defaults: true
+
+rules:
+  - id: no-force-push
+    pattern: "git push.*--force|git push.*-f\\b"
+    inject: "STOP. Do not force push. This can overwrite others' work. Use --force-with-lease at most, and only after explaining why."
+    cooldown: 60
+
+  - id: no-hard-reset
+    pattern: "git reset --hard"
+    inject: "STOP. git reset --hard will destroy uncommitted changes permanently. Stash first, or explain exactly what you're discarding and why."
+    cooldown: 60
+
+  - id: no-delete-branch
+    pattern: "git branch -[dD]|git push.*--delete"
+    inject: "Confirm before deleting a branch — make sure it's fully merged or explicitly abandoned."
+    cooldown: 60
+
+  - id: no-rebase-main
+    pattern: "git rebase (main|master|origin/main|origin/master)"
+    inject: "Rebasing onto main rewrites history. Confirm this is intentional and you know the downstream effects."
+    cooldown: 120
+
+  - id: no-clean-force
+    pattern: "git clean -f|git clean -fd|git clean -fx"
+    inject: "STOP. git clean -f deletes untracked files permanently. Use --dry-run first to see what would be removed."
+    cooldown: 60
+
+  - id: no-checkout-dot
+    pattern: "git checkout \\.|git restore \\."
+    inject: "STOP. This discards all working directory changes. Confirm you have no unsaved work, or stash first."
+    cooldown: 60

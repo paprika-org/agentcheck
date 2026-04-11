@@ -1,0 +1,42 @@
+# AgentCheck Rule Pack: stay-in-scope
+# Catches when an AI agent starts modifying files or systems outside the expected scope.
+# Useful for agents working on a specific feature or codebase area.
+# Use with: agentcheck --config rules/stay-in-scope.yaml -- claude
+
+include_defaults: false
+
+rules:
+  - id: no-modify-lockfile
+    pattern: "(package-lock\\.json|yarn\\.lock|pnpm-lock\\.yaml|Cargo\\.lock|Gemfile\\.lock)"
+    inject: "You're touching a lockfile. Only modify lockfiles if you intentionally added/removed a dependency. Was this intentional?"
+    cooldown: 120
+
+  - id: no-modify-env-files
+    pattern: "\\.env(\\.local|\\.production|\\.staging|\\.test)?['\"]"
+    inject: "You're modifying an environment file. These contain secrets and environment-specific config. Confirm this is intended."
+    cooldown: 60
+
+  - id: no-modify-cicd
+    pattern: "(\\.github/workflows/|\\.gitlab-ci\\.yml|Jenkinsfile|\.circleci/config)"
+    inject: "You're modifying CI/CD configuration. Changes here affect all builds and deployments. Confirm this is in scope for the current task."
+    cooldown: 120
+
+  - id: no-modify-migrations
+    pattern: "(migrations/|db/migrate/|alembic/versions/)"
+    inject: "You're modifying database migrations. These are hard to reverse in production. Confirm this migration is complete and correct before proceeding."
+    cooldown: 120
+
+  - id: no-global-npm-install
+    pattern: "npm install -g|npm i -g|yarn global add"
+    inject: "STOP. Do not install global packages — this modifies the system environment, not just the project. Use local dependencies instead."
+    cooldown: 60
+
+  - id: no-rm-rf
+    pattern: "rm -rf|rm -r -f|rimraf /"
+    inject: "STOP. This is a destructive recursive delete. Confirm the exact path being deleted and that it's safe to remove."
+    cooldown: 30
+
+  - id: no-sudo
+    pattern: "\\bsudo\\b"
+    inject: "You're using sudo — elevated privileges. Confirm why this needs root access and whether it can be avoided."
+    cooldown: 60
