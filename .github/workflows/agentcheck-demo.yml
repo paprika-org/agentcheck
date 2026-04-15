@@ -1,0 +1,81 @@
+name: AgentCheck Demo
+
+# Demonstrates using agentcheck to audit AI agent output in CI.
+# Trigger manually or adapt this for your own project.
+#
+# Typical use case: after an AI-assisted session, run agentcheck in shadow
+# mode against a replay of the agent's output. The shadow log shows which
+# guardrails would have fired — no actual injection needed in CI.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/agentcheck-demo.yml'
+
+jobs:
+  demo:
+    name: Run agentcheck demo
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+
+      - name: Install agentcheck
+        run: npm install -g .
+
+      - name: Show available rules
+        run: agentcheck --rules
+
+      # Shadow mode: observe what rules WOULD fire, without injecting.
+      # Replace the `node -e` command with your actual agent invocation.
+      - name: Run simulated agent session (shadow mode)
+        run: |
+          agentcheck --shadow --shadow-log /tmp/agentcheck-shadow.log -- node -e "
+            // Simulated AI agent output — these lines match built-in rules
+            console.log('Let me analyze the problem first');
+            console.log('A pragmatic fix here would be to catch and ignore the error');
+            console.log('This is a pre-existing issue in the codebase, not worth fixing now');
+            setTimeout(() => {
+              console.log('Done — changes committed.');
+              process.exit(0);
+            }, 200);
+          "
+
+      - name: Show shadow log
+        if: always()
+        run: |
+          echo "=== AgentCheck Shadow Log ==="
+          if [ -f /tmp/agentcheck-shadow.log ]; then
+            cat /tmp/agentcheck-shadow.log
+          else
+            echo "(no rules matched — agent output was clean)"
+          fi
+
+      - name: Upload shadow log
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: agentcheck-shadow-log
+          path: /tmp/agentcheck-shadow.log
+          if-no-files-found: ignore
+
+      # Example: fail the job if any rules fired.
+      # Useful for strict enforcement in CI pipelines.
+      - name: Check for rule violations (strict mode example)
+        run: |
+          if [ -f /tmp/agentcheck-shadow.log ] && [ -s /tmp/agentcheck-shadow.log ]; then
+            echo "::warning::AgentCheck detected patterns that would trigger corrections."
+            echo "Review the shadow log artifact for details."
+            # Uncomment the next line to fail the build on violations:
+            # exit 1
+          else
+            echo "AgentCheck: no violations detected."
+          fi

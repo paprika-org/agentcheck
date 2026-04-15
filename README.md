@@ -1,5 +1,7 @@
 # AgentCheck
 
+[![CI](https://github.com/paprika-org/agentcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/paprika-org/agentcheck/actions/workflows/ci.yml)
+
 > "All of my unsupervised worker agents have sidecars that inject messages when thinking tokens match some heuristics. Any time Opus says 'pragmatic', it's instant — 'Pragmatic fix is always wrong, do the Correct fix'."
 >
 > — gck1 on Hacker News, April 2026
@@ -150,6 +152,29 @@ v0.1 — core proxy and injection works. Collecting feedback on which rules matt
 → **Try it and tell us what rules you'd add:** [agentcheck@agentmail.to](mailto:agentcheck@agentmail.to)
 
 → **Want the hosted version** (web dashboard, team rules, Slack alerts, injection history): [join the waitlist](mailto:agentcheck@agentmail.to?subject=Waitlist)
+
+## CI Integration
+
+Use agentcheck in GitHub Actions to audit AI agent output without injecting:
+
+```yaml
+- name: Install agentcheck
+  run: npm install -g agentcheck
+
+- name: Run agent with guardrails (shadow mode)
+  run: |
+    agentcheck --shadow --shadow-log /tmp/agentcheck.log -- your-agent-command
+
+- name: Upload shadow log
+  uses: actions/upload-artifact@v4
+  with:
+    name: agentcheck-shadow-log
+    path: /tmp/agentcheck.log
+```
+
+Shadow mode observes what rules would have fired without modifying agent output. Upload the log as an artifact to audit AI sessions in CI.
+
+See [`.github/workflows/agentcheck-demo.yml`](.github/workflows/agentcheck-demo.yml) for a full working example.
 
 ## License
 
