@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>agentcheck</title>
+  <meta name="description" content="agentcheck is a stdin/stdout proxy for CLI coding agents that injects corrections when the agent outputs bad patterns.">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --link: #58a6ff;
+      --good: #3fb950;
+      --warn: #d29922;
+      --bad: #f85149;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.6 Menlo, Monaco, Consolas, monospace;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover,
+    a:focus {
+      text-decoration: underline;
+    }
+
+    .wrap {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 48px 20px 64px;
+    }
+
+    .section {
+      margin-top: 48px;
+    }
+
+    h1, h2, h3, p, ul, pre {
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: 28px;
+      line-height: 1.3;
+      margin-bottom: 16px;
+      font-weight: 700;
+    }
+
+    h2 {
+      font-size: 16px;
+      margin-bottom: 12px;
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .lede {
+      color: var(--text);
+    }
+
+    .links {
+      margin-top: 18px;
+    }
+
+    .links a {
+      margin-right: 16px;
+      white-space: nowrap;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    pre {
+      overflow-x: auto;
+      white-space: pre;
+      color: var(--text);
+      margin-bottom: 0;
+    }
+
+    code {
+      font: inherit;
+      color: var(--text);
+    }
+
+    ul {
+      padding-left: 18px;
+      margin-bottom: 0;
+    }
+
+    li {
+      margin-bottom: 8px;
+    }
+
+    .label {
+      color: var(--muted);
+    }
+
+    .good {
+      color: var(--good);
+    }
+
+    .warn {
+      color: var(--warn);
+    }
+
+    .bad {
+      color: var(--bad);
+    }
+
+    .footer {
+      margin-top: 56px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="hero">
+      <p class="muted">agentcheck</p>
+      <h1>Your CLI agent keeps reaching for the wrong fix.</h1>
+      <p class="lede">
+        agentcheck is a stdin/stdout proxy that wraps CLI coding agents and injects corrections when the agent outputs bad patterns.
+      </p>
+      <p class="muted">
+        v0.1.1 — core proxy works. Rough but working.
+      </p>
+      <div class="links">
+        <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+        <a href="mailto:agentcheck@agentmail.to">Rules / feedback</a>
+        <a href="mailto:agentcheck@agentmail.to?subject=Hosted%20agentcheck%20waitlist">Hosted version waitlist</a>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>What it is</h2>
+      <p>
+        Wrap any CLI agent, watch its stdout, and step in when it starts doing known bad things:
+        blaming "pre-existing issues", deleting tests, skipping tests with <code>.skip()</code> or <code>xit()</code>, using empty catch blocks, or calling a bad shortcut a "pragmatic fix".
+      </p>
+      <p class="muted">
+        The idea came from a Hacker News comment by gck1 in April 2026: "All of my unsupervised worker agents have sidecars that inject messages when thinking tokens match some heuristics."
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>Demo</h2>
+      <div class="panel">
+        <pre><code>$ agentcheck -- claude
+
+agent&gt; I'll use a pragmatic fix here and disable the flaky test first.
+
+agentcheck&gt; correction: do the correct fix
+agentcheck&gt; STOP: fix the code, not the test
+agentcheck&gt; do not use .skip() / xit() to get past the issue
+
+agent&gt; Right. I'll debug the race in src/session_store.ts instead.
+
+$ agentcheck --shadow -- claude
+[shadow] would inject: do the correct fix
+[shadow] would inject: STOP: fix the code, not the test
+[shadow] would inject: do not use .skip() / xit()</code></pre>
+      </div>
+      <p class="muted">
+        Shadow mode logs what would have fired without injecting: <code>--shadow</code>
+      </p>
+    </section>
+
+    <section class="section">
+      <h2>Install</h2>
+      <div class="panel">
+        <pre><code># npm package name is reserved, but not published yet
+npm install -g agentcheck
+
+# for now, install from GitHub source
+git clone https://github.com/paprika-org/agentcheck
+cd agentcheck
+npm install
+npm link
+
+# wrap any CLI agent
+agentcheck -- claude</code></pre>
+      </div>
+    </section>
+
+    <section class="section">
+      <h2>Rules</h2>
+      <div class="panel">
+        <pre><code>built-in catches
+
+"pragmatic fix" / "pragmatic solution"
+  - inject: do the correct fix
+
+"pre-existing issue"
+  - don't blame pre-existing bugs
+
+deleting tests
+  - STOP, fix the code not the test
+
+.skip() / xit()
+  - fix the issue, don't skip
+
+empty catch blocks
+  - handle or rethrow</code></pre>
+      </div>
+      <p class="label" style="margin-top:14px;">Rule packs</p>
+      <ul>
+        <li><code>protect-git.yaml</code> — no force push, hard reset, branch delete</li>
+        <li><code>no-secrets.yaml</code> — catches hardcoded credentials</li>
+        <li><code>stay-in-scope.yaml</code> — no <code>sudo</code>, no <code>rm -rf</code>, no editing CI</li>
+      </ul>
+    </section>
+
+    <section class="section">
+      <h2>Contact</h2>
+      <p>
+        Send rules, bug reports, and bad-agent transcripts to
+        <a href="mailto:agentcheck@agentmail.to">agentcheck@agentmail.to</a>.
+      </p>
+      <p>
+        If you want a hosted version, use
+        <a href="mailto:agentcheck@agentmail.to?subject=Hosted%20agentcheck%20waitlist">the waitlist email</a>.
+      </p>
+    </section>
+
+    <footer class="footer">
+      MIT license. Source on <a href="https://github.com/paprika-org/agentcheck">GitHub</a>.
+    </footer>
+  </main>
+</body>
+</html>
