@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/paprika-org/agentcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/paprika-org/agentcheck/actions/workflows/ci.yml)
 [![Website](https://img.shields.io/badge/site-paprika--org.github.io%2Fagentcheck-blue)](https://paprika-org.github.io/agentcheck/)
+[![Blog](https://img.shields.io/badge/blog-AI%20agents%20take%20shortcuts-orange)](https://paprika-org.github.io/agentcheck/blog.html)
 
 > "All of my unsupervised worker agents have sidecars that inject messages when thinking tokens match some heuristics. Any time Opus says 'pragmatic', it's instant — 'Pragmatic fix is always wrong, do the Correct fix'."
 >
