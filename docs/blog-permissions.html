@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code permissions not working? Here's what settings.json can't catch</title>
+  <meta name="description" content="Claude Code permissions not working? This post explains why settings.json deny rules are useful but incomplete, and why runtime monitoring helps catch behavior static claude code permissions rules miss.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-permissions.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Claude Code permissions not working? Here's what settings.json can't catch">
+  <meta property="og:description" content="Why Claude Code permissions in settings.json can fail in practice, and how runtime monitoring helps catch behavior static rules miss.">
+  <meta property="og:url" content="https://paprika-org.github.io/agentcheck/blog-permissions.html">
+  <meta property="og:site_name" content="agentcheck">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --panel-soft: #0f172a;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --link: #7dd3fc;
+      --border: #243049;
+      --code-bg: #0a0f1d;
+      --accent: #f59e0b;
+      --max: 760px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      background:
+        radial-gradient(circle at top right, rgba(125, 211, 252, 0.08), transparent 28%),
+        radial-gradient(circle at top left, rgba(245, 158, 11, 0.06), transparent 24%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .wrap {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0 24px;
+      font-size: 0.98rem;
+      color: var(--muted);
+    }
+
+    nav a {
+      color: var(--muted);
+    }
+
+    article {
+      background: linear-gradient(180deg, rgba(18, 26, 47, 0.92), rgba(15, 23, 42, 0.96));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 34px 28px;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+    }
+
+    h1, h2 {
+      line-height: 1.2;
+      letter-spacing: -0.02em;
+      font-family: "Segoe UI", system-ui, sans-serif;
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 5vw, 3rem);
+    }
+
+    h2 {
+      margin-top: 42px;
+      margin-bottom: 14px;
+      font-size: 1.35rem;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.98rem;
+      margin-bottom: 26px;
+    }
+
+    p {
+      margin: 0 0 18px;
+      font-size: 1.06rem;
+    }
+
+    .lede {
+      font-size: 1.14rem;
+      color: #f3f4f6;
+    }
+
+    code, pre {
+      font-family: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      overflow-x: auto;
+      color: #dbeafe;
+      line-height: 1.55;
+      margin: 18px 0 24px;
+      font-size: 0.95rem;
+    }
+
+    .note {
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    footer {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 18px 24px 40px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      margin: 26px 0;
+    }
+
+    @media (max-width: 640px) {
+      article {
+        padding: 24px 18px;
+      }
+
+      .wrap {
+        padding: 16px;
+      }
+
+      nav {
+        flex-direction: column;
+        gap: 8px;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav>
+      <a href="https://paprika-org.github.io/agentcheck/">agentcheck</a>
+      <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+    </nav>
+
+    <article>
+      <header>
+        <h1>Claude Code permissions not working? Here's what settings.json can't catch</h1>
+        <div class="meta">
+          Published <time datetime="2026-04-20">2026-04-20</time>
+        </div>
+      </header>
+
+      <p class="lede">I started looking into Claude Code permissions because I was testing Claude Code with <code>autoAccept</code> turned on and wanted a very boring setup: let it edit files inside one project, but do not let it read secrets or wander into unrelated directories. That sounded simple enough. I added deny rules, ran a few tests, and for a minute I thought I had it locked down.</p>
+
+      <p>Then I hit the kind of problem that makes you stop trusting the guardrails. I was trying to let an agent refactor a small script in one repo. Instead, it started inspecting files I did not mean to expose, and one run even tried to touch something outside the project boundary. Nothing catastrophic happened, but it was exactly the sort of “that should not even be possible” moment that sends you digging through config docs at 1 a.m.</p>
+
+      <h2>What settings.json does and doesn’t do</h2>
+
+      <p>To be fair, Claude Code’s <code>settings.json</code> permissions are not useless. The allow and deny system gives you a static policy layer. If you know a specific command or file pattern you never want touched, you can express that. For obvious cases, it helps.</p>
+
+      <pre><code>{
+  "permissions": {
+    "deny": ["Bash(rm -rf:*)", "Read(**/.env)"]
+  }
+}</code></pre>
+
+      <p>The issue is that this kind of rule set only catches what you can describe in advance, in the exact shape you thought of in advance. Deny <code>Read(**/.env)</code>, and maybe that blocks the direct path you had in mind. But what about a secret copied into another config file? What about a tool invocation that causes an indirect read? What about an agent making an API call with data you did not expect it to collect first?</p>
+
+      <p>I also ran into the brittle part that is easy to miss during initial testing: wait, it worked, then it didn’t. One run would respect the boundary I expected, and the next run would take a slightly different path through the task and suddenly interact with something I had not explicitly denied. Static rules can look solid when the workflow is narrow. As soon as the agent behavior gets a little less predictable, the gaps show up.</p>
+
+      <p>That is the core limitation. <code>settings.json</code> is a policy file, not a live observer. It can express rules. It cannot tell you much about what actually happened during a run, what nearly happened, or which behaviors drifted outside the intent of the task.</p>
+
+      <h2>The gap: what happens at runtime that static rules miss</h2>
+
+      <p>The part that bothered me most was not the obvious dangerous command case. It was the subtle stuff. An agent does not need to run <code>rm -rf</code> to create risk. It can read something sensitive, make a network call you were not expecting, or modify a file outside the intended scope because the task phrasing nudged it there.</p>
+
+      <p>And once the run is underway, the real question changes. It is no longer “did my config contain a deny rule for this exact string?” It becomes “what is this agent actually doing right now?” Static config is weak at answering that because the important events are behavioral. Path expansion, tool chaining, task reinterpretation, and side effects happen at runtime.</p>
+
+      <p>If you have used Claude Code long enough, you have probably seen this pattern: the rule set feels fine in a toy example, then a real task exposes edge cases immediately. That does not mean the permissions system is broken. It means it is incomplete.</p>
+
+      <h2>Runtime monitoring as the missing layer</h2>
+
+      <p>What ended up making more sense for me was adding a runtime behavioral layer on top of the static rules. That is what <a href="https://github.com/paprika-org/agentcheck">agentcheck</a> is for. It does not replace Claude Code’s built-in permissions. It watches what the agent actually does during execution, flags behavior that violates the policy you care about, and starts in shadow mode by default so you can see issues before you start blocking anything.</p>
+
+      <p>That last part mattered to me. I did not want to guess at a perfect policy on day one and accidentally break legitimate tasks. I wanted visibility first. In shadow mode, you can see the behavior you would have blocked without changing the run outcome.</p>
+
+      <pre><code>[agentcheck] WARN filesystem/no-write-outside-scope
+  agent tried to write: /Users/alex/.ssh/config
+  allowed scope: /Users/alex/myproject/**
+  action: shadow (would have blocked)</code></pre>
+
+      <p>That kind of output is what I was missing with plain <code>settings.json</code>. It answers the practical question: what happened, why is it a problem, and what would enforcement have done? That is much easier to reason about than trying to predict every dangerous path up front.</p>
+
+      <h2>Getting started</h2>
+
+      <p>If you want to try it, start with the GitHub repo: <a href="https://github.com/paprika-org/agentcheck">github.com/paprika-org/agentcheck</a>. The project is a runtime behavioral governance layer for Claude Code agents. It monitors agent behavior at runtime and flags violations, with shadow mode on by default. That default is the right call, in my opinion, because you can watch a few real sessions first and figure out where your actual risk is before you turn any rule into a hard block.</p>
+
+      <h2>Closing</h2>
+
+      <p>I do not think the answer is “throw away <code>settings.json</code>.” Static deny rules are still worth having. They are just not enough on their own if you care about real boundaries rather than hopeful ones.</p>
+
+      <p>What feels solved for me now is visibility. I can tell when an agent tries to step outside the allowed scope, and I do not have to rely entirely on a brittle pile of string-matching rules. What is not solved yet is everything else. agentcheck is still early; it only has three rule packs so far, and there is plenty of room to improve coverage and ergonomics. But even in that state, adding runtime monitoring closed a gap that Claude Code permissions alone did not catch.</p>
+
+      <div class="divider"></div>
+
+      <p class="note">Canonical URL: <a href="https://paprika-org.github.io/agentcheck/blog-permissions.html">https://paprika-org.github.io/agentcheck/blog-permissions.html</a></p>
+    </article>
+  </div>
+
+  <footer>
+    More from <a href="https://paprika-org.github.io/agentcheck/">agentcheck</a>.
+  </footer>
+</body>
+</html>
