@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code audit log: how to see what your agent actually did</title>
+  <meta name="description" content="Claude Code has no built-in audit log. Here's how to add one with agentcheck -- persistent JSONL logging of every tool call your agent makes.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-audit-log.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Claude Code audit log: how to see what your agent actually did">
+  <meta property="og:description" content="Claude Code has no built-in audit log. Here's how to add one with agentcheck -- persistent JSONL logging of every tool call your agent makes.">
+  <meta property="og:url" content="https://paprika-org.github.io/agentcheck/blog-audit-log.html">
+  <meta property="og:site_name" content="agentcheck">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --panel-soft: #0f172a;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --link: #7dd3fc;
+      --border: #243049;
+      --code-bg: #0a0f1d;
+      --accent: #f59e0b;
+      --max: 760px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(125,211,252,0.08), transparent 28%),
+        radial-gradient(circle at top left, rgba(245,158,11,0.06), transparent 24%),
+        var(--bg);
+      line-height: 1.7;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .shell {
+      max-width: calc(var(--max) + 48px);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 0.98rem;
+    }
+
+    nav .brand {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    article {
+      max-width: var(--max);
+      margin: 0 auto;
+      background: linear-gradient(180deg, rgba(18,26,47,0.92), rgba(15,23,42,0.96));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 34px 28px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.76rem;
+      margin-bottom: 10px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 14px;
+    }
+
+    h1 {
+      font-size: 2.35rem;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 34px;
+    }
+
+    p {
+      margin: 0 0 16px;
+      font-size: 1.04rem;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 26px;
+    }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.94rem;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid #1e2d45;
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 20px 0;
+      line-height: 1.55;
+    }
+
+    .note {
+      color: var(--muted);
+    }
+
+    footer {
+      max-width: var(--max);
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 0.95rem;
+      text-align: center;
+      padding-bottom: 18px;
+    }
+
+    @media (max-width: 640px) {
+      article {
+        padding: 26px 20px;
+      }
+
+      h1 {
+        font-size: 1.85rem;
+      }
+
+      nav {
+        font-size: 0.92rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav>
+      <a class="brand" href="index.html">agentcheck</a>
+      <a href="index.html">Back to docs</a>
+    </nav>
+
+    <article>
+      <div class="eyebrow">Developer Blog</div>
+      <h1>Claude Code audit log: how to see what your agent actually did</h1>
+      <div class="meta">Published April 20, 2026</div>
+
+      <p>I let Claude Code run for about 20 minutes on a refactor, came back, and realized I had no clean way to answer the basic question I actually cared about: what did it do? Not the summary. Not the vibe. The real sequence. Which files did it read, which commands did it run, what tools did it call, and in what order? That is the point where I started wanting a real <strong>claude code audit log</strong>, not just a chat transcript and a Git diff after the fact.</p>
+
+      <p>Git helps, but only at the end. It tells you what changed, not what the agent tried before it got there. Claude Code's session view helps while you are watching it live, but once the session is over the trail is thin. If you are doing solo work, maybe that is fine for a while. If you are using agents on a team, touching production scripts, or working in a repo with secrets, it stops being fine pretty fast.</p>
+
+      <p>I built agentcheck because I wanted something dead simple: hook into Claude Code's runtime events, log every meaningful action to a file, and keep that record around after the session disappears. No mystery. No hand waving. Just an audit trail I can grep, archive, review, and feed into other tooling later.</p>
+
+      <h2>Why a claude code audit log is missing by default</h2>
+
+      <p>This is not really a knock on Claude Code. It is mostly a product boundary issue. Claude Code is optimized for the interactive loop between developer and agent. You prompt, it thinks, it asks for tools, it edits files, you keep moving. That loop is fast because it is focused on the current session, not on persistent governance or historical review.</p>
+
+      <p>The problem is that session visibility is not the same thing as an audit trail. A real audit log needs to survive after the terminal closes. It needs structure. It needs to be machine-readable. It needs enough detail to answer cross-session questions like, "what commands did we let agents run this week?" or "when did an agent start touching files outside <code>src/</code>?" Claude Code does not try to be that system.</p>
+
+      <p>In practice, the built-in experience has three gaps if you care about review and compliance:</p>
+
+      <p>First, the logs are not a durable record you can depend on across sessions.</p>
+      <p>Second, there is no clean cross-session review flow for agent behavior over time.</p>
+      <p>Third, the output is not structured in a way that makes downstream analysis easy.</p>
+
+      <p>That last part matters more than people think. If all you have is conversational text, you can read it. You cannot reliably query it. You cannot filter by tool name, path, exit code, or timestamp without doing messy parsing work later.</p>
+
+      <h2>What agentcheck adds to the claude code audit log story</h2>
+
+      <p>agentcheck sits one layer above Claude Code's built-in <code>settings.json</code> rules. Those rules are still useful. You should keep using them. But rules alone are not observability. Blocking a command is one thing. Knowing what the agent actually attempted to do over time is a different job.</p>
+
+      <p>agentcheck hooks into Claude Code's <code>PreToolUse</code> and <code>PostToolUse</code> events. When the agent is about to run a command, read a file, write a file, or call another tool, agentcheck can capture that event. Then it writes a structured JSONL record to <code>~/.agentcheck/audit.log</code>. One line per event. Easy to tail in another terminal. Easy to archive. Easy to ship somewhere else if you want.</p>
+
+      <p>It can also flag anomalies in real time. I am being deliberate with that wording. This is not some all-seeing policy engine that understands your entire organization. Right now it is more practical than fancy. You can define checks and get alerted when the agent starts doing something that looks off, like touching sensitive paths or issuing unexpected shell commands. That alone is enough to catch a lot of the "wait, why is it doing that?" moments.</p>
+
+      <pre><code>{"ts":"2026-04-20T14:03:11.482Z","event":"PreToolUse","tool":"Bash","session_id":"cc_8d17","input":{"command":"find . -name '*.env'"},"cwd":"/workspace/app","status":"pending"}
+{"ts":"2026-04-20T14:03:11.641Z","event":"anomaly","rule":"sensitive-file-pattern","severity":"warn","message":"Command targets possible secret files","session_id":"cc_8d17"}
+{"ts":"2026-04-20T14:03:12.209Z","event":"PostToolUse","tool":"Bash","session_id":"cc_8d17","result":{"exit_code":0,"duration_ms":727},"cwd":"/workspace/app"}
+{"ts":"2026-04-20T14:03:14.004Z","event":"PostToolUse","tool":"Write","session_id":"cc_8d17","input":{"path":"src/refactor/api.ts"},"result":{"bytes_written":1842}}</code></pre>
+
+      <p>That is the core value. I do not want to reconstruct the story from memory. I want the story written down as it happens.</p>
+
+      <h2>What this helps with in real developer workflows</h2>
+
+      <p>The obvious use case is forensics after a weird run. The agent touched something it should not have, or a refactor went sideways, or a test fixture got rewritten in a way nobody expected. With a proper <strong>claude code audit log</strong>, I can trace the behavior without guessing.</p>
+
+      <p>It also helps with basic team trust. If multiple developers are using Claude Code in the same codebase, "what happened?" should not require screenshots and vague recollections. A JSONL log gives you a common source of truth. Not perfect truth. But good enough to review real behavior instead of debating impressions.</p>
+
+      <p>Then there is the compliance angle. Some teams need a record of agent activity because they are touching regulated code, internal tooling, or systems with stricter change controls. agentcheck does not solve compliance by itself. I do not want to pretend it does. But it gives you the raw runtime evidence that those workflows usually need.</p>
+
+      <h2>What agentcheck does not do yet</h2>
+
+      <p>I want to be straight about this. agentcheck is not a complete security boundary. It is not a sandbox. It is not magical prevention. If you need airtight isolation, you still need OS-level controls, repository permissions, network restrictions, and sane Claude Code configuration.</p>
+
+      <p>It also does not yet give you every possible analysis view out of the box. Right now the foundation is the persistent log and the runtime checks. That is intentional. I would rather have a boring log file that is always there than a glossy dashboard built on top of incomplete data.</p>
+
+      <p>Still, for the original problem, it does the job. I wanted to know what Claude Code actually did. Now I can look at <code>~/.agentcheck/audit.log</code> and answer that without playing detective.</p>
+
+      <p>If you are looking for a practical way to add a <strong>claude code audit log</strong> to your workflow, start with agentcheck here: <a href="https://github.com/paprika-org/agentcheck">https://github.com/paprika-org/agentcheck</a>.</p>
+    </article>
+
+    <footer>
+      View the project on <a href="https://github.com/paprika-org/agentcheck">GitHub</a>.
+    </footer>
+  </div>
+</body>
+</html>
