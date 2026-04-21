@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code session monitoring: see every tool call in real time</title>
+  <meta name="description" content="Claude Code session monitoring explained: see tool calls in real time, track agent activity, and review a full local session log with agentcheck.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-session-monitoring.html">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --link: #7dd3fc;
+      --accent: #f59e0b;
+      --border: #24304d;
+      --code-bg: #0f172a;
+      --success: #86efac;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at top, #16203d 0%, var(--bg) 45%, #080c18 100%);
+      color: var(--text);
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.75;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code, pre, kbd {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    }
+
+    .container {
+      width: min(920px, calc(100% - 2rem));
+      margin: 0 auto;
+    }
+
+    .nav {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      backdrop-filter: blur(10px);
+      background: rgba(11, 16, 32, 0.88);
+      border-bottom: 1px solid rgba(125, 211, 252, 0.12);
+    }
+
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      color: var(--text);
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .hero {
+      padding: 4rem 0 2rem;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      margin-bottom: 1rem;
+      padding: 0.35rem 0.7rem;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+      border-radius: 999px;
+      color: var(--accent);
+      background: rgba(245, 158, 11, 0.08);
+      font-size: 0.9rem;
+      letter-spacing: 0.03em;
+    }
+
+    h1, h2 {
+      line-height: 1.2;
+      margin: 0 0 1rem;
+    }
+
+    h1 {
+      font-size: clamp(2.2rem, 5vw, 3.7rem);
+      max-width: 12ch;
+    }
+
+    h2 {
+      font-size: 1.6rem;
+      margin-top: 2.5rem;
+      color: #f8fafc;
+    }
+
+    p {
+      margin: 1rem 0;
+      font-size: 1.08rem;
+    }
+
+    .lead {
+      font-size: 1.2rem;
+      color: #dbe4f2;
+      max-width: 70ch;
+    }
+
+    .panel {
+      background: linear-gradient(180deg, rgba(18, 26, 47, 0.96), rgba(12, 18, 35, 0.96));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 1.25rem;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    }
+
+    .article {
+      padding-bottom: 4rem;
+    }
+
+    .article strong {
+      color: #f8fafc;
+    }
+
+    .code-block {
+      margin: 1.5rem 0;
+      background: var(--code-bg);
+      border: 1px solid #26324f;
+      border-radius: 14px;
+      overflow-x: auto;
+    }
+
+    .code-block pre {
+      margin: 0;
+      padding: 1rem 1.1rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: #d1fae5;
+    }
+
+    .callout {
+      border-left: 4px solid var(--accent);
+      padding: 1rem 1rem 1rem 1.1rem;
+      margin: 1.5rem 0;
+      background: rgba(245, 158, 11, 0.08);
+      border-radius: 10px;
+    }
+
+    .steps {
+      margin: 1rem 0 1.5rem;
+      padding-left: 1.2rem;
+    }
+
+    .steps li {
+      margin: 0.5rem 0;
+    }
+
+    .footer {
+      border-top: 1px solid rgba(125, 211, 252, 0.12);
+      color: var(--muted);
+      padding: 2rem 0 3rem;
+      font-size: 0.95rem;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .cta {
+      margin-top: 2rem;
+      padding: 1.25rem;
+      border: 1px solid rgba(125, 211, 252, 0.18);
+      background: rgba(125, 211, 252, 0.06);
+      border-radius: 16px;
+    }
+
+    .cta a {
+      font-weight: 700;
+    }
+
+    @media (max-width: 700px) {
+      .nav-inner {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .hero {
+        padding-top: 2.5rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <div class="brand">agentcheck</div>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+        <a href="blog.html">Blog posts</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+    <section class="hero">
+      <div class="eyebrow">Claude Code visibility</div>
+      <h1>Claude Code session monitoring: see every tool call in real time</h1>
+      <p class="lead">If you have ever wondered, “claude code what is my agent doing?”, this is the missing layer. I wanted a simple way to monitor Claude Code agent behavior locally, in real time, without guessing which tools fired or what happened during a run.</p>
+    </section>
+
+    <article class="article panel">
+      <p>I started looking for a practical answer to <strong>claude code session monitoring</strong> after a few runs where Claude Code clearly did a lot of work, but I could not see enough of it while it was happening. I was running Claude Code and had no idea what it was actually doing. The agent would pause, call tools, touch files, and eventually produce an answer, but my view into the session was incomplete. If you are trying to <strong>monitor Claude Code agent</strong> behavior during autonomous work, that gap becomes a real problem fast.</p>
+
+      <p>The issue is not that Claude Code is unusable. It is that autonomous agents compress a lot of actions into a short period of time, and once you let them operate with some freedom, you need observability. You need to know which tool was invoked, what arguments were passed, when it happened, and what the overall session looked like when it ended. Without that, debugging becomes guesswork. Governance becomes guesswork too.</p>
+
+      <p>That is the core problem: Claude Code agents can run autonomously, but there is no built-in session monitoring layer that gives me a complete local trace. I cannot natively inspect every tool event in one place. I cannot easily answer basic questions like which tools fired, what files were touched, or how many tokens were consumed across a session. For developers trying to <strong>claude code track agent activity</strong>, that missing visibility matters just as much as the final output.</p>
+
+      <h2>What I actually wanted from session monitoring</h2>
+
+      <p>I did not want a giant enterprise platform. I wanted a local, developer-friendly record of behavior. Specifically, I wanted to see tool activity as it happened, not just after the fact. I wanted a durable session log I could inspect later. And I wanted the implementation to stay close to Claude Code itself instead of requiring some fragile wrapper process that would break every time my workflow changed.</p>
+
+      <p>That is why agentcheck exists. It is a hooks-based behavioral governance layer for Claude Code. Instead of trying to reconstruct activity after the session from scraps, agentcheck uses Claude Code hooks to capture behavior at the point where it happens. The important hooks here are <code>PreToolUse</code> and <code>PostToolUse</code>. Those events let agentcheck record every tool invocation in real time as the agent works.</p>
+
+      <div class="callout">
+        <strong>Short version:</strong> agentcheck lets me see every tool call as Claude Code runs, then writes a session summary to JSONL at the end so I can review what happened later.
+      </div>
+
+      <h2>How agentcheck solves Claude Code session monitoring</h2>
+
+      <p>The design is intentionally simple. When Claude Code is running with agentcheck enabled, the hooks observe tool use before and after execution. That means I get a real-time stream of what the agent is attempting and what it completed. This is the part that makes <strong>claude code session monitoring</strong> feel concrete instead of theoretical. I can stop wondering what the agent is doing and start reading the actual event trail.</p>
+
+      <p>Because the monitoring is hook-driven, it follows the session naturally. There is no need to manually annotate prompts or remember to enable some extra logging mode after the fact. If the agent uses a file read tool, I can see that. If it runs a shell command, I can see that. If it edits or inspects files, the monitoring log captures the event metadata around those actions. At the end of the session, agentcheck writes a structured JSONL summary locally, which gives me a durable session record suitable for review, grep, or downstream scripting.</p>
+
+      <p>Here is the kind of output I wanted to have available after a run:</p>
+
+      <div class="code-block">
+        <pre>{
+  "ts":"2026-04-21T14:02:11.481Z",
+  "session_id":"cc_9fd3a2",
+  "event":"PreToolUse",
+  "tool":"ReadFile",
+  "args":{"path":"/workspace/app/routes.ts"}
+}
+{
+  "ts":"2026-04-21T14:02:11.689Z",
+  "session_id":"cc_9fd3a2",
+  "event":"PostToolUse",
+  "tool":"ReadFile",
+  "status":"ok",
+  "duration_ms":208
+}
+{
+  "ts":"2026-04-21T14:02:18.122Z",
+  "session_id":"cc_9fd3a2",
+  "event":"PreToolUse",
+  "tool":"Bash",
+  "args":{"command":"npm test -- --runInBand","cwd":"/workspace/app"}
+}
+{
+  "ts":"2026-04-21T14:02:25.901Z",
+  "session_id":"cc_9fd3a2",
+  "event":"PostToolUse",
+  "tool":"Bash",
+  "status":"ok",
+  "duration_ms":7779
+}
+{
+  "ts":"2026-04-21T14:02:33.017Z",
+  "session_id":"cc_9fd3a2",
+  "event":"PreToolUse",
+  "tool":"EditFile",
+  "args":{"path":"/workspace/app/routes.ts","operation":"replace"}
+}
+{
+  "ts":"2026-04-21T14:05:09.444Z",
+  "session_id":"cc_9fd3a2",
+  "event":"SessionSummary",
+  "tool_calls":17,
+  "files_touched":4,
+  "token_estimate":48291
+}</pre>
+      </div>
+
+      <p>That snippet is realistic because it answers the questions I actually have during and after a session. Which tools were used? In what order? With which arguments? How long did they take? How big did the session get? If you are trying to <strong>monitor Claude Code agent</strong> behavior in a way that is useful for debugging or auditing, that information is the difference between confidence and blind trust.</p>
+
+      <h2>Installation and setup</h2>
+
+      <p>The setup is intentionally short. Install agentcheck globally, initialize it once, and then launch Claude Code with monitoring active:</p>
+
+      <div class="code-block">
+        <pre>npm install -g github:paprika-org/agentcheck
+agentcheck init
+# opens claude code with monitoring active
+claude --no-strict-mode</pre>
+      </div>
+
+      <p>That flow gives you a local monitoring layer without introducing a separate hosted dependency. I like that because it keeps the behavior visible on the same machine where the agent is running. It also makes the output easy to inspect with standard tools once the session is over.</p>
+
+      <h2>Why local monitoring is still useful</h2>
+
+      <p>There is a temptation to assume that if something does not have a big dashboard, it is not a serious monitoring solution. I think that is backwards for this use case. Most of the time, when I ask “claude code what is my agent doing?”, I do not need a BI suite. I need the event stream and a clean local record. I need enough detail to understand behavior, verify intent, and catch surprises early.</p>
+
+      <p>That makes agentcheck a good fit for solo developers, small teams, and anyone experimenting with agentic workflows who wants a governance layer before they scale usage. It is also useful if you want to track repetitive patterns in agent behavior over time. A local JSONL log is not glamorous, but it is scriptable, composable, and honest. You can parse it, diff it, archive it, or feed it into your own tooling.</p>
+
+      <h2>Limitations</h2>
+
+      <p>There are limits, and they are worth stating clearly. Agentcheck is local monitoring. It does not provide a cloud dashboard. It does not send alerts. It is not pretending to be a complete security platform. Today, the strength is direct visibility into Claude Code tool behavior through hooks and a usable session record at the end.</p>
+
+      <p>For me, that is still enough to solve the immediate problem. I wanted <strong>claude code track agent activity</strong> capabilities that are practical right now, not a vague promise. Real-time hook capture plus end-of-session JSONL gets me that. It helps me understand what happened in a run, inspect the flow of work, and establish a baseline for behavioral governance around autonomous coding agents.</p>
+
+      <p>If you are searching for <strong>claude code session monitoring</strong> because you want to see every tool call in real time and keep a local session log, agentcheck is the missing piece I was looking for. It does not try to hide the mechanics. It exposes them. That is exactly what I want when an agent has enough autonomy to make meaningful changes in my workspace.</p>
+
+      <div class="cta">
+        <p><strong>Want to try it or send feedback?</strong></p>
+        <p>See the project on <a href="https://github.com/paprika-org/agentcheck">GitHub</a> or email <a href="mailto:agentcheck@agentmail.to">agentcheck@agentmail.to</a>. If you have been asking how to monitor Claude Code agent behavior in a real session, I would start there.</p>
+      </div>
+    </article>
+  </main>
+
+  <footer class="footer">
+    <div class="container">© 2026 agentcheck</div>
+  </footer>
+</body>
+</html>
