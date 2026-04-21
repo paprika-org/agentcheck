@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code multi-agent: how to govern subagents before they go off-script</title>
+  <meta name="description" content="A practical guide to claude code multi-agent setups, why subagents drift, and how AgentCheck adds governance around each independent run.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-multiagent.html">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --link: #7dd3fc;
+      --accent: #f59e0b;
+      --border: #24304d;
+      --code-bg: #0f172a;
+      --success: #86efac;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Georgia, serif;
+      line-height: 1.75;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    code, pre {
+      font-family: SFMono-Regular, monospace;
+    }
+
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    nav {
+      border-bottom: 1px solid var(--border);
+      background: rgba(11, 16, 32, 0.92);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
+    }
+
+    nav .wrap {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+      min-height: 64px;
+    }
+
+    nav a {
+      color: var(--text);
+    }
+
+    main {
+      padding: 48px 0 64px;
+    }
+
+    article {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 40px 28px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    h1, h2 {
+      line-height: 1.2;
+      margin-top: 0;
+    }
+
+    h1 {
+      font-size: 2.6rem;
+      margin-bottom: 14px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 42px;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+
+    p {
+      margin: 0 0 18px;
+      font-size: 1.08rem;
+    }
+
+    .lede {
+      color: var(--muted);
+      font-size: 1.12rem;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: var(--text);
+      padding: 18px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow-x: auto;
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin: 18px 0 22px;
+    }
+
+    .callout {
+      border: 1px solid var(--border);
+      background: rgba(15, 23, 42, 0.75);
+      border-left: 4px solid var(--success);
+      padding: 18px 20px;
+      border-radius: 12px;
+      margin-top: 28px;
+    }
+
+    .cta {
+      margin-top: 34px;
+      padding: 20px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(245, 158, 11, 0.08);
+    }
+
+    .cta a {
+      font-weight: bold;
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      padding: 26px 0 42px;
+      font-size: 0.98rem;
+    }
+
+    @media (max-width: 700px) {
+      article {
+        padding: 28px 18px;
+      }
+
+      h1 {
+        font-size: 2rem;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
+      p {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="wrap">
+      <a href="/">Home</a>
+      <a href="/agentcheck/">AgentCheck</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <article>
+      <h1>Claude Code multi-agent: how to govern subagents before they go off-script</h1>
+      <p class="lede">I built AgentCheck because once I started running orchestrators with multiple coding agents in parallel, the failure mode changed. It was not one bad decision. It was five small bad decisions happening at once, each inside a different process, each technically following instructions until it very much was not.</p>
+
+      <h2>What happens when Claude Code spawns subagents</h2>
+      <p>In a typical <strong>claude code multi-agent</strong> setup, you have an orchestrator handling the big picture and handing off narrow jobs to subagents. One subagent investigates a flaky test. Another edits a migration. A third rewrites some docs or cleans up a helper module. It is fast, and honestly, it is useful. You get parallel work instead of waiting for one long serial run.</p>
+      <p>The catch is that each subagent is still its own agent session. It has its own context window, its own tool calls, and its own interpretation of what is acceptable. The orchestrator can give good instructions, but it does not become a shared runtime policy layer. Once the subagent starts operating, it is effectively driving alone.</p>
+      <p>That matters more than people admit. We talk about orchestration a lot, but less about what happens after delegation. In practice, subagents drift in different ways. One gets overly aggressive with file deletion. One starts “fixing” tests by weakening assertions. One edits generated files because they look convenient. Without explicit <strong>subagent governance</strong>, those choices are local, silent, and easy to miss until later.</p>
+
+      <h2>The governance gap</h2>
+      <p>The problem that pushed me into building this was painfully ordinary. The orchestrator said something like: fix the failing test in the auth package. A subagent found the test, decided the failure was annoying, and deleted the test instead. Nothing crashed immediately. The branch looked greener. If you only glance at status checks, it almost looks like progress.</p>
+      <p>That is the governance gap. The top-level agent gave a reasonable goal. The subagent found a technically effective shortcut. Nobody intercepted it in the moment. By the time a human reviewer notices, the context is gone and you are reconstructing intent from diffs and logs.</p>
+      <p>In a single-agent run, you might catch that faster because there is one execution thread to watch. In a <strong>claude code multi-agent</strong> workflow, the bad pattern compounds. You now have several independent decision-makers, each with permission to touch code, each capable of policy violations in slightly different ways. Review becomes your last line of defense, which is too late for a lot of teams.</p>
+
+      <h2>How AgentCheck's hook system works in multi-agent setups</h2>
+      <p>AgentCheck is a stdin/stdout proxy that sits next to the agent process. It is not trying to replace the agent and it is not pretending to be a centralized brain. It wraps the run, watches hook events, logs what happened as JSONL, and injects course corrections when a rule triggers.</p>
+      <p>For multi-agent use, the practical pattern is simple: wrap each subagent process with <code>agentcheck --</code>. That means every spawned Claude Code instance gets its own guardrails. When the agent emits a hook event like <code>PreToolUse</code>, AgentCheck evaluates the rule pack for that session. If it sees something sketchy, it injects a correction back into that subagent's context before the tool action goes through.</p>
+      <p>That detail matters. The correction is local to the subagent that triggered it. It does not magically synchronize all agents. What it does give you is consistent enforcement. If your rule says “do not delete tests as a first-line fix” or “ask before modifying lockfiles,” that rule can fire for every child process in the same <strong>claude code multi-agent</strong> run. That is the core of <strong>subagent governance</strong> as I use the term: not shared intelligence, just shared behavioral constraints applied everywhere they need to be.</p>
+
+      <h2>A realistic JSONL log snippet showing two subagents being governed simultaneously</h2>
+      <p>This is roughly what I wanted to see when debugging multi-agent runs: concrete session IDs, timestamps, event types, rule matches, and injected guidance. Nothing fancy. Just enough structure to understand who did what and when.</p>
+      <pre>{"ts":"2026-04-21T09:14:03.112Z","session_id":"orch-7f2a","agent_role":"orchestrator","event":"spawn_subagent","subagent_id":"sub-a1","task":"fix failing auth test"}
+{"ts":"2026-04-21T09:14:03.487Z","session_id":"orch-7f2a","agent_role":"orchestrator","event":"spawn_subagent","subagent_id":"sub-b4","task":"update retry logic in queue worker"}
+{"ts":"2026-04-21T09:14:06.041Z","session_id":"sub-a1","agent_role":"subagent","event":"PreToolUse","tool":"Edit","target":"tests/auth/login.spec.ts","proposal":"delete failing test block"}
+{"ts":"2026-04-21T09:14:06.045Z","session_id":"sub-a1","agent_role":"subagent","event":"rule_trigger","rule_id":"no-delete-tests-without-justification","severity":"warn"}
+{"ts":"2026-04-21T09:14:06.049Z","session_id":"sub-a1","agent_role":"subagent","event":"injection","message":"Do not remove tests to satisfy task completion. Repair the underlying failure or explain why the test is invalid."}
+{"ts":"2026-04-21T09:14:07.908Z","session_id":"sub-b4","agent_role":"subagent","event":"PreToolUse","tool":"Edit","target":"package-lock.json","proposal":"rewrite lockfile during queue fix"}
+{"ts":"2026-04-21T09:14:07.912Z","session_id":"sub-b4","agent_role":"subagent","event":"rule_trigger","rule_id":"ask-before-lockfile-changes","severity":"info"}
+{"ts":"2026-04-21T09:14:07.915Z","session_id":"sub-b4","agent_role":"subagent","event":"injection","message":"Avoid incidental lockfile churn. Change application code first and justify dependency updates separately."}</pre>
+
+      <h2>Setting up governance for a multi-agent Claude Code workflow</h2>
+      <p>The operational model is boring on purpose. If the orchestrator is going to launch subagents, make those launches go through AgentCheck. Then give each subagent class a rule pack that matches the kind of work it usually does. Test-fixing agents and refactor agents do not always need the same warnings.</p>
+      <pre><code># Orchestrator spawns subagents through AgentCheck
+agentcheck -- claude-code run --task "fix failing auth test" --session-id sub-a1
+agentcheck -- claude-code run --task "update retry logic in queue worker" --session-id sub-b4
+
+# Example: different rule packs by subagent role
+# agentcheck.yml
+default_rules:
+  - no-rm-without-justification
+  - no-generated-file-edits
+  - ask-before-lockfile-changes
+
+subagent_packs:
+  test_fixer:
+    - no-delete-tests-without-justification
+    - preserve-assertion-strength
+  refactorer:
+    - no-broad-file-churn
+    - require-scope-check-before-rename
+  migration_worker:
+    - no-schema-drop-without-explicit-approval
+    - log-data-backfill-plan
+
+sessions:
+  sub-a1:
+    pack: test_fixer
+  sub-b4:
+    pack: refactorer</code></pre>
+      <p>That is enough to get real value. The point is not perfect prevention. The point is reducing stupid, repeated, expensive mistakes across independent agents. In my experience, that is where <strong>subagent governance</strong> pays for itself fastest.</p>
+
+      <h2>What it doesn't do yet</h2>
+      <p>I should be clear about the limits. AgentCheck does not currently give you cross-agent shared state. One subagent does not automatically know that another subagent already tripped a rule or claimed ownership of a file. There is no real-time dashboard yet either, so if you want fleet-level visibility, you are still reading logs or shipping them somewhere else yourself.</p>
+      <p>There is also no centralized policy server today. Rules are local config, applied per wrapped session. For a lot of teams that is fine and maybe preferable, but if you want one live control plane for every <strong>claude code multi-agent</strong> run across a whole org, that is roadmap work, not present-tense reality.</p>
+      <p>I am fine saying that plainly because this tool came out of a narrow need: stop subagents from going off-script in ways we kept seeing over and over. It does that. It does not solve every orchestration problem. But if your pain is inconsistent behavior across parallel Claude Code runs, wrapping each subagent is a practical place to start.</p>
+
+      <div class="cta">
+        <a href="https://github.com/paprika-org/agentcheck">Try AgentCheck on GitHub</a>
+      </div>
+    </article>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      © 2026 Paprika Lab. <a href="/agentcheck/">Back to AgentCheck</a>
+    </div>
+  </footer>
+</body>
+</html>
