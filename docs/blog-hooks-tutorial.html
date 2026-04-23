@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code hooks tutorial: guardrails, logging, and rule packs with agentcheck</title>
+  <meta name="description" content="A practical Claude Code hooks tutorial for developers who want guardrails, JSONL audit logs, and YAML rule packs using agentcheck.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Claude Code hooks tutorial: guardrails, logging, and rule packs with agentcheck">
+  <meta property="og:description" content="Learn how to use hook-based guardrails around Claude Code with agentcheck, including install steps, rule packs, logs, and real limitations.">
+  <meta property="og:url" content="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html">
+  <meta property="og:site_name" content="agentcheck">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --link: #7dd3fc;
+      --accent: #f59e0b;
+      --border: #24304d;
+      --code-bg: #0f172a;
+      --success: #86efac;
+      --max: 780px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Georgia, serif;
+      line-height: 1.7;
+      background:
+        radial-gradient(circle at top right, rgba(125, 211, 252, 0.08), transparent 28%),
+        radial-gradient(circle at top left, rgba(245, 158, 11, 0.07), transparent 24%),
+        var(--bg);
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .shell {
+      max-width: calc(var(--max) + 56px);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      font-size: 0.98rem;
+    }
+
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    article {
+      max-width: var(--max);
+      margin: 0 auto;
+      background: linear-gradient(180deg, rgba(18, 26, 47, 0.94), rgba(15, 23, 42, 0.98));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 34px 28px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.76rem;
+      margin-bottom: 10px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 14px;
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 1.45rem;
+      margin-top: 34px;
+    }
+
+    p, li {
+      font-size: 1.03rem;
+    }
+
+    p {
+      margin: 0 0 16px;
+    }
+
+    ul {
+      margin: 0 0 18px 22px;
+      padding: 0;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    .note, .cta {
+      background: rgba(11, 16, 32, 0.6);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin: 22px 0;
+    }
+
+    .note strong, .cta strong {
+      color: var(--success);
+    }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.94rem;
+    }
+
+    code {
+      background: rgba(15, 23, 42, 0.9);
+      padding: 0.12rem 0.32rem;
+      border-radius: 6px;
+    }
+
+    pre {
+      margin: 18px 0;
+      padding: 16px;
+      overflow-x: auto;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      line-height: 1.55;
+    }
+
+    .footer {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-top: 28px;
+    }
+
+    @media (max-width: 640px) {
+      .shell {
+        padding: 16px;
+      }
+
+      article {
+        padding: 24px 18px;
+      }
+
+      h1 {
+        font-size: 1.9rem;
+      }
+
+      nav {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav>
+      <a class="brand" href="index.html">agentcheck</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+      </div>
+    </nav>
+
+    <article>
+      <div class="eyebrow">Hooks Tutorial</div>
+      <h1>Claude Code hooks tutorial: guardrails, logging, and rule packs</h1>
+      <div class="meta">For developers who want practical control over agent behavior, not vague “safety” language.</div>
+
+      <p>If you searched for a <strong>claude code hooks tutorial</strong>, you probably want three concrete things: intercept what the agent does, keep an audit trail, and block risky actions before they happen. Claude Code does not ship with a built-in governance layer for that. <strong>agentcheck</strong> fills the gap by wrapping each Claude process with hook-based checks, logging tool calls to JSONL, and enforcing rule packs defined in YAML.</p>
+
+      <p>The useful mental model is simple: Claude runs as usual, but every tool invocation passes through hooks that can inspect, allow, or reject the action. That makes this setup helpful for local development, CI experiments, and teams that need to answer “what did the agent actually do?” after the fact.</p>
+
+      <h2>Install and basic usage</h2>
+      <p>Install agentcheck globally from GitHub:</p>
+
+      <pre><code>npm install -g github:paprika-org/agentcheck</code></pre>
+
+      <p>Once installed, you run Claude Code through agentcheck instead of launching it directly. The exact wrapper command may evolve with the project, but the practical pattern is:</p>
+
+      <pre><code>agentcheck -- claude</code></pre>
+
+      <p>That means agentcheck becomes the parent process, attaches hooks around the Claude session, and starts recording events. If you want a dedicated rules file, pass it explicitly:</p>
+
+      <pre><code>agentcheck --rules ./rules.yaml -- claude</code></pre>
+
+      <p>This is the first place where a <strong>claude code hooks tutorial</strong> should be honest: hooks are not magic. They can constrain tool usage and provide visibility, but they do not replace reviewing prompts, repository permissions, or sandboxing. They are a control layer, not a complete isolation boundary.</p>
+
+      <h2>What a rule pack looks like</h2>
+      <p>Rule packs are YAML files that express what the agent is allowed to do. A useful starter pack is one that permits read operations broadly but restricts destructive shell commands and writes outside the current repository.</p>
+
+      <pre><code>version: 1
+
+rules:
+  - id: allow-safe-read
+    description: Permit non-destructive read commands
+    match:
+      tool: shell
+      command_regex: "^(ls|pwd|cat|sed|find|rg)\\b"
+    action: allow
+
+  - id: block-destructive-git
+    description: Prevent hard resets and forced cleans
+    match:
+      tool: shell
+      command_regex: "^(git reset --hard|git clean -fdx)\\b"
+    action: deny
+
+  - id: block-parent-writes
+    description: Deny writes outside the repo root
+    match:
+      tool: write_file
+      path_regex: "^\\.\\./"
+    action: deny
+
+  - id: log-everything
+    description: Always emit an audit event
+    match:
+      tool: ".*"
+    action: log</code></pre>
+
+      <p>The exact schema depends on the project version, but the core idea is stable: match a tool call, decide whether to allow or deny it, and write the event to a log. If you have used policy engines before, this will feel familiar, but lighter-weight.</p>
+
+      <h2>Reading the audit log</h2>
+      <p>One of the most practical outcomes of using hooks is the JSONL log. Each line is an event you can grep, archive, or feed into a later analysis step. For example:</p>
+
+      <pre><code>{"ts":"2026-04-23T11:14:07Z","tool":"shell","args":{"command":"rg TODO src"},"rule":"allow-safe-read","decision":"allow"}
+{"ts":"2026-04-23T11:14:24Z","tool":"shell","args":{"command":"git reset --hard"},"rule":"block-destructive-git","decision":"deny"}
+{"ts":"2026-04-23T11:15:01Z","tool":"write_file","args":{"path":"../secrets.txt"},"rule":"block-parent-writes","decision":"deny"}</code></pre>
+
+      <p>This is enough to answer questions that normally become guesswork: which command was attempted, when it happened, and which rule made the decision. For teams running repeated agent tasks, JSONL is also easier to process than ad hoc terminal output.</p>
+
+      <pre><code>rg '"decision":"deny"' ./agentcheck.log.jsonl
+jq -c 'select(.tool == "shell")' ./agentcheck.log.jsonl
+tail -n 20 ./agentcheck.log.jsonl</code></pre>
+
+      <h2>Where hooks help most</h2>
+      <p>The best use cases are narrow and operational:</p>
+      <ul>
+        <li>Blocking a known-dangerous command set such as destructive Git or filesystem operations.</li>
+        <li>Capturing a durable audit trail of tool activity during long agent sessions.</li>
+        <li>Applying different rule packs for local development versus CI.</li>
+        <li>Making agent behavior legible enough to debug failures or policy violations.</li>
+      </ul>
+
+      <p>If your main problem is “I need the agent to never touch production credentials,” hooks are useful because you can deny known access patterns and log every attempt. If your problem is “I want a proof that no harmful behavior is possible,” hooks alone are not enough. You still need environment isolation and permission boundaries outside the agent process.</p>
+
+      <div class="note">
+        <strong>Limitation:</strong> a hook system can only govern the operations it can see and classify. If a risky action is disguised as a previously allowed shell command, your rules need to be specific enough to catch it.
+      </div>
+
+      <h2>Practical workflow for a repo</h2>
+      <p>A workable pattern is to start permissive, inspect the log, then tighten rules based on what the agent actually tries to do. In other words, do not design a perfect rule pack in the abstract. Let the session reveal its real command and file access patterns.</p>
+
+      <pre><code># 1. Run with logging first
+agentcheck --rules ./rules-observe.yaml -- claude
+
+# 2. Review actual tool usage
+jq -r '.tool' ./agentcheck.log.jsonl | sort | uniq -c
+
+# 3. Tighten the policy
+cp rules-observe.yaml rules-enforce.yaml
+
+# 4. Re-run with deny rules enabled
+agentcheck --rules ./rules-enforce.yaml -- claude</code></pre>
+
+      <p>This is usually more productive than starting with a highly restrictive file that blocks basic navigation, search, and read operations. The agent needs enough freedom to inspect the repo, but not enough freedom to cause irreversible damage.</p>
+
+      <h2>What this tutorial does not solve</h2>
+      <p>No serious <strong>claude code hooks tutorial</strong> should pretend hooks solve everything. They do not guarantee prompt quality. They do not stop data exfiltration if the allowed tool surface is too broad. They do not automatically understand business context. They are a strong operational layer for behavior governance, especially when paired with repository scoping, network limits, and reviewable logs.</p>
+
+      <p>They also introduce maintenance cost. Someone has to own the rule packs, revisit them when workflows change, and decide whether a deny event represents a real attack, an expected false positive, or a missing safe path. That tradeoff is normal. If you want control, you have to encode policy somewhere.</p>
+
+      <div class="cta">
+        <p><strong>Next step:</strong> if you want to try this on a real Claude session, start with the GitHub repo, install the tool, and build a small rules file around the commands your team already allows. The project is here: <a href="https://github.com/paprika-org/agentcheck">github.com/paprika-org/agentcheck</a>.</p>
+      </div>
+
+      <p class="footer">Canonical URL: <a href="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html">https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html</a></p>
+    </article>
+  </div>
+</body>
+</html>
