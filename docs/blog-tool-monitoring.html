@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude code tool use monitoring: practical logging and guardrails for agent runs</title>
+  <meta name="description" content="A practical guide to Claude code tool use monitoring with JSONL logs, hook-based guardrails, and YAML rule packs using agentcheck. Includes real commands, examples, and limitations.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Claude code tool use monitoring: practical logging and guardrails for agent runs">
+  <meta property="og:description" content="A practical guide to Claude code tool use monitoring with JSONL logs, hook-based guardrails, and YAML rule packs using agentcheck. Includes real commands, examples, and limitations.">
+  <meta property="og:url" content="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html">
+  <meta property="og:site_name" content="agentcheck">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --link: #7dd3fc;
+      --accent: #f59e0b;
+      --border: #24304d;
+      --code-bg: #0f172a;
+      --success: #86efac;
+      --panel-soft: #0f172a;
+      --max: 760px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(125, 211, 252, 0.08), transparent 30%),
+        radial-gradient(circle at top left, rgba(245, 158, 11, 0.07), transparent 24%),
+        var(--bg);
+      line-height: 1.7;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .shell {
+      max-width: calc(var(--max) + 56px);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      font-size: 0.98rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    article {
+      max-width: var(--max);
+      margin: 0 auto;
+      background: linear-gradient(180deg, rgba(18, 26, 47, 0.94), rgba(15, 23, 42, 0.98));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 34px 28px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.3);
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.76rem;
+      margin-bottom: 10px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 14px;
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 1.48rem;
+      margin-top: 34px;
+    }
+
+    h3 {
+      font-size: 1.12rem;
+      margin-top: 26px;
+    }
+
+    p, li {
+      font-size: 1.03rem;
+    }
+
+    p {
+      margin: 0 0 16px;
+    }
+
+    ul {
+      margin: 0 0 18px 22px;
+      padding: 0;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    .note, .cta {
+      background: rgba(15, 23, 42, 0.85);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px 18px;
+      margin: 22px 0;
+    }
+
+    .note strong, .cta strong {
+      color: var(--success);
+    }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.93rem;
+    }
+
+    code {
+      background: rgba(15, 23, 42, 0.85);
+      padding: 0.12rem 0.34rem;
+      border-radius: 6px;
+    }
+
+    pre {
+      margin: 0 0 20px;
+      padding: 16px;
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: var(--code-bg);
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .footer {
+      color: var(--muted);
+      font-size: 0.94rem;
+      margin-top: 26px;
+    }
+
+    @media (max-width: 700px) {
+      .shell {
+        padding: 16px;
+      }
+
+      nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      article {
+        padding: 24px 18px;
+      }
+
+      h1 {
+        font-size: 1.92rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav>
+      <a class="brand" href="index.html">agentcheck</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+      </div>
+    </nav>
+
+    <article>
+      <div class="eyebrow">Developer Guide</div>
+      <h1>Claude code tool use monitoring: practical logging and guardrails for agent runs</h1>
+      <div class="meta">Published for engineers running Claude Code in local or CI workflows</div>
+
+      <p>Claude code tool use monitoring matters once an agent can run shell commands, read files, or invoke other tools on your machine. If you need an audit trail, or you want to stop certain actions before they happen, you need more than transcripts. You need structured logs and an enforcement layer around each Claude process.</p>
+
+      <p>That is the problem <code>agentcheck</code> is built to solve. It wraps Claude Code with hook-based guardrails, writes tool activity to JSONL, and applies YAML rule packs that constrain what an agent can do. This is useful when you want repeatable visibility into tool calls, especially in team environments, CI jobs, or any workflow where "the agent probably did X" is not good enough.</p>
+
+      <h2>What you actually need to monitor</h2>
+      <p>For most developer workflows, good monitoring is not about recording everything forever. It is about answering a few concrete questions quickly:</p>
+      <ul>
+        <li>Which tools did the agent call, and in what order?</li>
+        <li>What arguments were passed to those tools?</li>
+        <li>Did the run try to execute a dangerous command or touch a sensitive path?</li>
+        <li>Can I enforce a policy instead of just detecting violations later?</li>
+      </ul>
+
+      <p>Claude code tool use monitoring is most useful when logs are machine-readable. JSONL works well because each event is a standalone line, which means you can inspect it with <code>jq</code>, stream it, or ship it into a log pipeline without special parsing.</p>
+
+      <h2>Install and run agentcheck</h2>
+      <p>The install path is intentionally simple:</p>
+
+      <pre><code>npm install -g github:paprika-org/agentcheck</code></pre>
+
+      <p>Once installed, run Claude Code through the wrapper instead of launching it directly. The exact invocation depends on how you use Claude Code locally, but the pattern is the same: start the agent process under <code>agentcheck</code> so hooks can observe tool calls and apply policies.</p>
+
+      <pre><code># Example pattern: run Claude Code through agentcheck
+agentcheck claude
+
+# Or pass through normal arguments
+agentcheck claude --prompt "inspect the repo and summarize failing tests"</code></pre>
+
+      <p>If your environment writes logs to a dedicated directory, keep that directory outside the repo and make rotation explicit. Agent traces can include file paths, command arguments, and snippets of content, so treat them as operational data, not harmless debug output.</p>
+
+      <h2>Example: inspect tool activity with JSONL</h2>
+      <p>A typical JSONL event stream for tool monitoring should be boring and parseable. That is a good thing. Here is the kind of output you want to be able to query:</p>
+
+      <pre><code>{"ts":"2026-04-23T12:00:01Z","tool":"shell","args":{"cmd":"ls -la"},"decision":"allow"}
+{"ts":"2026-04-23T12:00:03Z","tool":"read_file","args":{"path":"src/index.ts"},"decision":"allow"}
+{"ts":"2026-04-23T12:00:05Z","tool":"shell","args":{"cmd":"rm -rf /tmp/build"},"decision":"deny","rule":"block-destructive-shell"}</code></pre>
+
+      <p>Once you have that, normal Unix tooling becomes enough for quick analysis:</p>
+
+      <pre><code># Count tool usage by tool name
+jq -r '.tool' agentcheck.log.jsonl | sort | uniq -c | sort -nr
+
+# Show denied actions
+jq 'select(.decision == "deny")' agentcheck.log.jsonl
+
+# Review shell commands only
+jq 'select(.tool == "shell") | {ts, cmd: .args.cmd, decision, rule}' agentcheck.log.jsonl</code></pre>
+
+      <p>This is where the monitoring becomes practical. You are no longer reading a chat transcript trying to infer whether the agent used <code>grep</code>, touched a secret file, or retried a blocked command five times.</p>
+
+      <h2>Example: constrain behavior with YAML rule packs</h2>
+      <p>Logging alone is passive. If you already know what must not happen, add rules and fail fast. A rule pack can block high-risk commands, prevent writes outside a working directory, or restrict tools entirely for certain jobs.</p>
+
+      <pre><code>rules:
+  - id: block-destructive-shell
+    when:
+      tool: shell
+      args:
+        cmd_regex: '(^|\\s)(rm\\s+-rf|mkfs|dd\\s+if=)(\\s|$)'
+    action: deny
+
+  - id: block-home-directory-writes
+    when:
+      tool: write_file
+      args:
+        path_regex: '^/home/'
+    action: deny
+
+  - id: allow-readonly-repo-analysis
+    when:
+      tool: shell
+      args:
+        cmd_regex: '^(ls|find|rg|cat|git\\s+status|git\\s+diff)'
+    action: allow</code></pre>
+
+      <p>That setup will not solve every policy problem, but it covers the common ones: destructive shell calls, writes to the wrong place, and enforcing a read-only analysis mode. For CI, this is often enough to turn an agent from "interesting but risky" into something you can actually run in automation.</p>
+
+      <h2>What this solves well, and what it does not</h2>
+      <p>There are real limits here, and they matter.</p>
+
+      <ul>
+        <li>It monitors tool use, not intent. If a safe-looking command has bad effects, policy quality still depends on your rules.</li>
+        <li>It does not magically classify all risky behavior. You need to maintain rule packs as your workflows evolve.</li>
+        <li>Logs can contain sensitive material. If prompts or command arguments reference secrets, your storage and retention policy need to reflect that.</li>
+        <li>Hook-based controls are strongest when every agent entry point is wrapped. If someone bypasses the wrapper and launches Claude Code directly, you lose both monitoring and enforcement.</li>
+      </ul>
+
+      <p>The honest framing is this: <code>agentcheck</code> gives you structured visibility and enforceable constraints around Claude Code, but it is not a full sandbox. If you need isolation from the host system, use OS-level controls as well. Behavioral governance and system isolation solve different parts of the problem.</p>
+
+      <h2>Recommended baseline for teams</h2>
+      <p>If you are introducing Claude code tool use monitoring for a team, a reasonable baseline looks like this:</p>
+
+      <ul>
+        <li>Wrap every local and CI Claude Code run with <code>agentcheck</code>.</li>
+        <li>Store JSONL logs per run with a clear retention window.</li>
+        <li>Start with a deny list for obviously destructive shell patterns.</li>
+        <li>Add path-based restrictions for secrets, home directories, and deployment keys.</li>
+        <li>Review denied events weekly and update the rule pack instead of adding one-off exceptions ad hoc.</li>
+      </ul>
+
+      <p>That gives you something operationally useful without overengineering the first pass.</p>
+
+      <div class="note">
+        <strong>Practical takeaway:</strong> if your current answer to "what did the agent actually do?" is "read the transcript," you do not have reliable tool monitoring yet.
+      </div>
+
+      <h2>Call to action</h2>
+      <p>If you want a straightforward starting point for Claude code tool use monitoring, install <code>agentcheck</code>, run Claude Code through it, and inspect the JSONL output before writing any complex rules. Then add a small YAML rule pack that blocks destructive shell commands and out-of-bounds writes. That sequence gives you immediate visibility and a sane first layer of control.</p>
+
+      <div class="cta">
+        <p>Project repo: <a href="https://github.com/paprika-org/agentcheck">github.com/paprika-org/agentcheck</a></p>
+        <p>Install with <code>npm install -g github:paprika-org/agentcheck</code> and use the repository examples as the starting point for your own rule packs.</p>
+      </div>
+
+      <div class="footer">
+        Canonical URL: <a href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html">https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html</a>
+      </div>
+    </article>
+  </div>
+</body>
+</html>
