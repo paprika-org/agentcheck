@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog — agentcheck</title>
+  <meta name="description" content="Technical articles on Claude Code behavioral governance, hook-based guardrails, tool use monitoring, and multi-agent safety.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-index.html">
+  <link rel="sitemap" type="application/xml" href="sitemap.xml">
+  <style>
+    :root {
+      --bg: #0d1117;
+      --panel: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --muted: #8b949e;
+      --link: #58a6ff;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font: 16px/1.6 Menlo, Monaco, Consolas, monospace; }
+    a { color: var(--link); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap { max-width: 680px; margin: 0 auto; padding: 48px 20px 64px; }
+    .nav { display: flex; gap: 20px; margin-bottom: 48px; font-size: .875rem; }
+    .nav a { opacity: .7; }
+    .nav a:hover { opacity: 1; }
+    h1 { font-size: 1.5rem; margin: 0 0 8px; }
+    .subtitle { opacity: .6; margin-bottom: 40px; font-size: .9rem; }
+    ul.posts { list-style: none; padding: 0; margin: 0; }
+    ul.posts li.post { border-bottom: 1px solid var(--border); padding: 18px 0; }
+    ul.posts li.post:last-child { border-bottom: none; }
+    ul.posts li.post a { font-size: 1rem; font-weight: 500; }
+    .footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); font-size: .8rem; opacity: .4; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <nav class="nav">
+      <a href="index.html">agentcheck</a>
+      <a href="https://github.com/paprika-org/agentcheck">github</a>
+    </nav>
+    <h1>Blog</h1>
+    <p class="subtitle">Claude Code governance, hooks, and agent safety — technical writing.</p>
+    <ul class="posts">
+      <li class="post"><a href="blog-parallel-agents.html">Claude Code parallel agents: per-process guardrails that actually work</a></li>
+      <li class="post"><a href="blog-session-monitoring.html">Claude Code session monitoring: see every tool call in real time</a></li>
+      <li class="post"><a href="blog-audit-log.html">Claude Code audit log: how to see what your agent actually did</a></li>
+      <li class="post"><a href="blog-multiagent.html">Claude Code multi-agent: how to govern subagents before they go off-script</a></li>
+      <li class="post"><a href="blog-permissions.html">Claude Code permissions not working? Here's what settings.json can't catch</a></li>
+      <li class="post"><a href="blog-hooks-tutorial.html">Claude Code hooks tutorial: guardrails, logging, and rule packs with agentcheck</a></li>
+      <li class="post"><a href="blog-guardrails.html">Claude Code guardrails: practical controls for tool use, logging, and policy enforcement</a></li>
+      <li class="post"><a href="blog-tool-monitoring.html">Claude code tool use monitoring: practical logging and guardrails for agent runs</a></li>
+      <li class="post"><a href="blog.html">AI coding agents take shortcuts. Here's what that looks like. — agentcheck</a></li>
+    </ul>
+    <div class="footer">
+      <a href="https://github.com/paprika-org/agentcheck">github.com/paprika-org/agentcheck</a>
+    </div>
+  </div>
+</body>
+</html>
