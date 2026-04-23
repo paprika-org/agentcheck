@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code guardrails: practical controls for tool use, logging, and policy enforcement</title>
+  <meta name="description" content="A practical guide to Claude Code guardrails: how to constrain tool use, log every action, and enforce YAML rule packs with agentcheck.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-guardrails.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Claude Code guardrails: practical controls for tool use, logging, and policy enforcement">
+  <meta property="og:description" content="A practical guide to Claude Code guardrails: how to constrain tool use, log every action, and enforce YAML rule packs with agentcheck.">
+  <meta property="og:url" content="https://paprika-org.github.io/agentcheck/blog-guardrails.html">
+  <meta property="og:site_name" content="agentcheck">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --link: #7dd3fc;
+      --accent: #f59e0b;
+      --border: #24304d;
+      --code-bg: #0f172a;
+      --success: #86efac;
+      --max: 760px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Georgia, serif;
+      line-height: 1.72;
+      background:
+        radial-gradient(circle at top right, rgba(125, 211, 252, 0.08), transparent 28%),
+        radial-gradient(circle at top left, rgba(245, 158, 11, 0.07), transparent 24%),
+        var(--bg);
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .shell {
+      max-width: calc(var(--max) + 48px);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 24px;
+      font-size: 0.98rem;
+    }
+
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+
+    article {
+      max-width: var(--max);
+      margin: 0 auto;
+      background: linear-gradient(180deg, rgba(18, 26, 47, 0.93), rgba(15, 23, 42, 0.97));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 34px 28px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.76rem;
+      margin-bottom: 10px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 14px;
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 1.48rem;
+      margin-top: 34px;
+    }
+
+    h3 {
+      font-size: 1.14rem;
+      margin-top: 24px;
+    }
+
+    p, li {
+      font-size: 1.03rem;
+    }
+
+    p {
+      margin: 0 0 16px;
+    }
+
+    ul {
+      margin: 0 0 18px 20px;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 26px;
+    }
+
+    .note {
+      border-left: 3px solid var(--accent);
+      padding: 10px 14px;
+      margin: 20px 0;
+      background: rgba(245, 158, 11, 0.08);
+      border-radius: 8px;
+    }
+
+    .success {
+      border-left: 3px solid var(--success);
+      padding: 10px 14px;
+      margin: 20px 0;
+      background: rgba(134, 239, 172, 0.08);
+      border-radius: 8px;
+    }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.94rem;
+    }
+
+    code {
+      background: rgba(255,255,255,0.04);
+      padding: 0.12rem 0.32rem;
+      border-radius: 6px;
+    }
+
+    pre {
+      margin: 18px 0 22px;
+      padding: 16px;
+      overflow-x: auto;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      line-height: 1.55;
+    }
+
+    .cta {
+      margin-top: 32px;
+      padding: 18px 20px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: rgba(125, 211, 252, 0.05);
+    }
+
+    footer {
+      max-width: var(--max);
+      margin: 18px auto 0;
+      color: var(--muted);
+      font-size: 0.92rem;
+      text-align: center;
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        padding: 16px;
+      }
+
+      article {
+        padding: 24px 18px;
+      }
+
+      h1 {
+        font-size: 1.9rem;
+      }
+
+      nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <nav>
+      <a class="brand" href="index.html">agentcheck</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+      </div>
+    </nav>
+
+    <article>
+      <div class="eyebrow">Behavioral Governance</div>
+      <h1>Claude Code guardrails: practical controls for tool use, logging, and policy enforcement</h1>
+      <div class="meta">For developers running autonomous coding agents in real repos</div>
+
+      <p>If you are looking for <strong>claude code guardrails</strong>, the problem is usually not prompt quality. The real issue is execution control: what commands the agent can run, where it can write, and how you inspect what happened after the fact. Claude Code is useful, but once it starts invoking tools against a live repository, you need a policy layer outside the model.</p>
+
+      <p>A workable approach is to wrap each Claude process with a supervisor that can inspect tool calls, log them, and block actions that violate your rules. That is what <code>agentcheck</code> does. It adds hook-based guardrails around Claude Code, writes every tool call to JSONL, and loads YAML rule packs that define what is allowed or denied.</p>
+
+      <h2>What guardrails should actually cover?</h2>
+      <p>For a developer workflow, useful Claude Code guardrails are concrete and narrow. They should answer questions like:</p>
+      <ul>
+        <li>Can the agent write outside the current repo?</li>
+        <li>Can it run destructive shell commands such as <code>rm -rf</code> or <code>git reset --hard</code>?</li>
+        <li>Can it touch secrets, deployment files, or CI config?</li>
+        <li>Can you reconstruct the exact sequence of tool calls later?</li>
+      </ul>
+
+      <p>That last point matters. Without logs, a blocked or failed run is hard to debug, and a successful run is hard to trust. You want enforcement and observability together, not as separate systems.</p>
+
+      <h2>Install and run agentcheck</h2>
+      <p>The install path is simple. AgentCheck is distributed directly from GitHub:</p>
+
+      <pre><code>npm install -g github:paprika-org/agentcheck</code></pre>
+
+      <p>From there, the typical workflow is:</p>
+
+      <pre><code># Example: run Claude Code behind agentcheck with a rules file
+agentcheck --rules ./agentcheck.rules.yml -- claude</code></pre>
+
+      <p>The exact invocation depends on how you launch Claude Code in your environment, but the pattern is the same: <code>agentcheck</code> sits in front, loads a rule pack, and intercepts tool activity.</p>
+
+      <h2>Start with a minimal rule pack</h2>
+      <p>The easiest mistake is writing a giant policy before you know what the agent actually does. Start with a short rule pack that blocks obviously risky behavior and lets normal coding work continue.</p>
+
+      <pre><code>version: 1
+
+rules:
+  - id: deny-destructive-shell
+    tool: shell
+    match:
+      command_regex: '(rm -rf|git reset --hard|sudo )'
+    action: deny
+    message: 'Destructive or privileged shell command blocked'
+
+  - id: deny-secrets
+    tool: read
+    match:
+      path_regex: '(\.env|id_rsa|credentials\.json)'
+    action: deny
+    message: 'Secret material is off limits'
+
+  - id: restrict-writes
+    tool: write
+    match:
+      path_regex: '^(/workspace/my-repo/|src/|tests/)'
+    action: allow
+
+  - id: deny-other-writes
+    tool: write
+    action: deny
+    message: 'Writes outside approved paths are blocked'</code></pre>
+
+      <p>This does not make the agent safe in every context, but it closes off common failure modes. It also forces you to be explicit about scope. If the agent only needs <code>src/</code> and <code>tests/</code>, do not leave the whole filesystem available.</p>
+
+      <h2>Use the logs as part of development</h2>
+      <p>One reason people ask for Claude Code guardrails is that they want post-run accountability, not just prevention. AgentCheck logs every tool call to JSONL, which is much easier to query than free-form terminal output.</p>
+
+      <pre><code>{"ts":"2026-04-23T09:10:12Z","tool":"read","path":"src/parser.ts","result":"ok"}
+{"ts":"2026-04-23T09:10:14Z","tool":"shell","command":"npm test","result":"ok","exit_code":0}
+{"ts":"2026-04-23T09:10:18Z","tool":"write","path":"src/parser.ts","result":"denied","rule_id":"deny-other-writes"}</code></pre>
+
+      <p>With logs like that, you can answer practical questions quickly:</p>
+      <ul>
+        <li>Did the agent try to run a forbidden command?</li>
+        <li>Was a failure caused by the model or by policy?</li>
+        <li>Which files did it read before making an edit?</li>
+      </ul>
+
+      <p>You can process the JSONL with standard tools:</p>
+
+      <pre><code># Show denied actions
+jq 'select(.result == "denied")' .agentcheck/log.jsonl
+
+# Count shell commands by exit code
+jq -r 'select(.tool == "shell") | [.exit_code] | @tsv' .agentcheck/log.jsonl | sort | uniq -c</code></pre>
+
+      <h2>Good guardrails are iterative</h2>
+      <p>A useful pattern is to begin in a mostly permissive mode, inspect the logs, and then tighten the rules based on observed behavior. For example, if the agent keeps trying to read your entire home directory to find config files, add a deny rule. If it only needs test execution, restrict shell to a small command set.</p>
+
+      <pre><code>version: 1
+
+rules:
+  - id: allow-safe-shell
+    tool: shell
+    match:
+      command_regex: '^(npm test|npm run lint|pnpm test|pytest)$'
+    action: allow
+
+  - id: deny-all-other-shell
+    tool: shell
+    action: deny
+    message: 'Shell access is limited to test and lint commands'</code></pre>
+
+      <p>This is more reliable than asking the model to “be careful.” Model instructions are advisory. External hooks are enforcement.</p>
+
+      <div class="note">
+        Honest limitation: guardrails depend on the tools you can actually intercept. If an agent can escape the wrapped execution path, your policy will not see that behavior. Keep the wrapper on the critical path and verify your launch method.
+      </div>
+
+      <h2>Where these controls help most</h2>
+      <p>In practice, Claude Code guardrails are most valuable in a few specific situations:</p>
+      <ul>
+        <li>Running agents against production-adjacent repositories with deployment scripts, infra code, or secrets nearby.</li>
+        <li>Letting multiple developers or CI jobs share the same agent workflow with a consistent baseline policy.</li>
+        <li>Debugging why an agent failed after a long run, especially when tool calls matter more than the final answer.</li>
+      </ul>
+
+      <p>They are less useful if your environment is already fully sandboxed and disposable, or if you only run the agent manually for tiny one-off edits. Even then, logging is still valuable because it gives you a real execution trace instead of guesswork.</p>
+
+      <div class="success">
+        The practical goal is not “perfect safety.” It is tighter operational control: narrower permissions, reproducible logs, and explicit policy at the process boundary.
+      </div>
+
+      <h2>What agentcheck does and does not do</h2>
+      <p>AgentCheck is a governance layer, not a replacement for OS sandboxing, container isolation, or human review. It helps constrain agent behavior and record it. You should still use normal engineering controls: separate credentials, least privilege, branch protections, and isolated environments for risky work.</p>
+
+      <p>That said, if your current setup is “run Claude Code and hope the prompt is enough,” adding hook-based rules and JSONL audit logs is a substantial improvement. It gives you something concrete to enforce and something concrete to inspect.</p>
+
+      <div class="cta">
+        <p>If you need <strong>claude code guardrails</strong> that are explicit, inspectable, and easy to version with your repo, start with AgentCheck. Install it with <code>npm install -g github:paprika-org/agentcheck</code> and review the source at <a href="https://github.com/paprika-org/agentcheck">github.com/paprika-org/agentcheck</a>.</p>
+      </div>
+    </article>
+
+    <footer>
+      Canonical URL: <a href="https://paprika-org.github.io/agentcheck/blog-guardrails.html">https://paprika-org.github.io/agentcheck/blog-guardrails.html</a>
+    </footer>
+  </div>
+</body>
+</html>
