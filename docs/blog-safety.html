@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code safety: practical guardrails, logs, and rule packs for real agent runs</title>
+  <meta name="description" content="Claude Code safety is mostly about constraining side effects, logging tool use, and enforcing rules before an agent can do damage. This guide shows a practical setup with agentcheck.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-safety.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Claude Code safety: practical guardrails, logs, and rule packs for real agent runs">
+  <meta property="og:description" content="Claude Code safety is mostly about constraining side effects, logging tool use, and enforcing rules before an agent can do damage. This guide shows a practical setup with agentcheck.">
+  <meta property="og:url" content="https://paprika-org.github.io/agentcheck/blog-safety.html">
+  <meta property="og:site_name" content="agentcheck">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --link: #7dd3fc;
+      --accent: #f59e0b;
+      --border: #24304d;
+      --code-bg: #0f172a;
+      --success: #86efac;
+      --max: 760px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(125, 211, 252, 0.08), transparent 28%),
+        radial-gradient(circle at top left, rgba(245, 158, 11, 0.06), transparent 24%),
+        var(--bg);
+      line-height: 1.72;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .shell {
+      max-width: calc(var(--max) + 48px);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 24px;
+      font-size: 0.98rem;
+    }
+
+    nav .brand {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    nav .links {
+      display: flex;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    article {
+      max-width: var(--max);
+      margin: 0 auto;
+      background: linear-gradient(180deg, rgba(18, 26, 47, 0.94), rgba(15, 23, 42, 0.98));
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 34px 28px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.28);
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.76rem;
+      margin-bottom: 10px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 14px;
+    }
+
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+      margin-top: 34px;
+    }
+
+    p, li {
+      font-size: 1.04rem;
+    }
+
+    p {
+      margin: 0 0 16px;
+    }
+
+    ul {
+      margin: 0 0 18px 20px;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 26px;
+    }
+
+    .note, .cta {
+      border: 1px solid var(--border);
+      background: rgba(11, 16, 32, 0.65);
+      border-radius: 12px;
+      padding: 16px 18px;
+      margin: 22px 0;
+    }
+
+    .note strong, .cta strong {
+      color: var(--success);
+    }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.94rem;
+    }
+
+    code {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(36, 48, 77, 0.9);
+      border-radius: 6px;
+      padding: 0.12rem 0.32rem;
+    }
+
+    pre {
+      margin: 18px 0 22px;
+      padding: 16px;
+      overflow-x: auto;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      line-height: 1.55;
+    }
+
+    .footer {
+      margin-top: 30px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.96rem;
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        padding: 16px;
+      }
+
+      article {
+        padding: 24px 18px;
+      }
+
+      h1 {
+        font-size: 1.9rem;
+      }
+
+      nav {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","headline":"Claude Code safety: practical guardrails, logs, and rule packs for real agent runs","description":"Claude Code safety is mostly about constraining side effects, logging tool use, and enforcing rules before an agent can do damage. This guide shows a practical setup with agentcheck.","url":"https://paprika-org.github.io/agentcheck/blog-safety.html","datePublished":"2026-04-25","dateModified":"2026-04-25","publisher":{"@type":"Organization","name":"agentcheck"}}
+  </script>
+</head>
+<body>
+  <div class="shell">
+    <nav>
+      <a class="brand" href="index.html">agentcheck</a>
+      <div class="links">
+        <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+      </div>
+    </nav>
+
+    <article>
+      <div class="eyebrow">Behavioral Governance For Claude Code</div>
+      <h1>Claude Code safety: practical guardrails, logs, and rule packs for real agent runs</h1>
+      <div class="meta">Published April 25, 2026 • For developers running coding agents in real repos</div>
+
+      <p>Claude Code safety is not a vague alignment problem. In practice, it means stopping an agent from doing risky things by default, recording what it actually did, and making the allowed behavior explicit enough that another engineer can review it. If your agent can run shell commands, edit files, or touch credentials, you need controls around the process, not just a carefully worded prompt.</p>
+
+      <p>A useful baseline is: wrap every Claude process, log every tool call, and enforce a small rule pack before the command executes. That is what <code>agentcheck</code> is built for. It acts as a behavioral governance layer for Claude Code using hook-based guardrails, JSONL audit logs, and YAML rule packs that constrain what agents can do.</p>
+
+      <h2>What usually goes wrong</h2>
+      <p>Most Claude Code safety failures are ordinary engineering failures:</p>
+      <ul>
+        <li>The agent runs a command with broader filesystem access than intended.</li>
+        <li>It modifies files outside the target directory because the task description was underspecified.</li>
+        <li>It touches production config, secrets, or deployment scripts during a local refactor.</li>
+        <li>No one can reconstruct what happened afterward because there is no durable log.</li>
+      </ul>
+
+      <p>Prompting helps, but prompts are advisory. If the runtime can still execute a bad command, you have not really solved the control problem.</p>
+
+      <h2>Install and wrap the agent</h2>
+      <p>The simplest setup is to install <code>agentcheck</code>, point it at a rule pack, and launch Claude Code through it.</p>
+
+      <pre><code>npm install -g github:paprika-org/agentcheck</code></pre>
+
+      <p>A minimal workflow looks like this:</p>
+
+      <pre><code>mkdir -p .agentcheck/rules
+cat &gt; .agentcheck/rules/default.yaml &lt;&lt;'YAML'
+rules:
+  - id: block-git-push
+    description: Prevent remote writes
+    match:
+      tool: shell
+      command: "(^|\\s)git\\s+push(\\s|$)"
+    action: deny
+
+  - id: block-env-read
+    description: Prevent reading local env files
+    match:
+      tool: shell
+      command: "(^|\\s)(cat|less|grep)\\s+.*\\.env"
+    action: deny
+
+  - id: restrict-paths
+    description: Only allow writes in src and tests
+    match:
+      tool: write
+      path_not_matches: "^(src|tests)/"
+    action: deny
+YAML</code></pre>
+
+      <pre><code>agentcheck \
+  --rules .agentcheck/rules/default.yaml \
+  --log .agentcheck/logs/claude.jsonl \
+  -- claude</code></pre>
+
+      <p>The exact Claude launch command may vary in your environment, but the pattern is the same: <code>agentcheck</code> sits in front, evaluates each tool invocation, and writes a durable event log.</p>
+
+      <h2>What the logs buy you</h2>
+      <p>For Claude Code safety, auditability matters almost as much as prevention. If an agent made a bad edit, you want a timeline: what tool was called, with what arguments, and whether a rule allowed or denied it.</p>
+
+      <pre><code>{"ts":"2026-04-25T10:14:09Z","tool":"shell","command":"git status --short","decision":"allow","rule_id":null}
+{"ts":"2026-04-25T10:14:18Z","tool":"write","path":"src/parser.ts","decision":"allow","rule_id":null}
+{"ts":"2026-04-25T10:14:31Z","tool":"shell","command":"git push origin main","decision":"deny","rule_id":"block-git-push"}</code></pre>
+
+      <p>Because the log is JSONL, it is easy to grep, ship to another system, or inspect during CI.</p>
+
+      <pre><code>jq -c 'select(.decision=="deny")' .agentcheck/logs/claude.jsonl
+
+jq -r '.tool' .agentcheck/logs/claude.jsonl | sort | uniq -c</code></pre>
+
+      <p>This also changes team conversations. Instead of arguing about whether an agent is “generally safe,” you can review the exact denied commands and the exact write scope allowed by policy.</p>
+
+      <h2>Start with narrow rules, then loosen them</h2>
+      <p>A common mistake is trying to define a perfect policy up front. A better pattern is to begin with a restrictive rule pack and expand only when real tasks require it. For example, if you only want an agent to refactor application code and tests, block everything else first.</p>
+
+      <pre><code>rules:
+  - id: allow-src-writes
+    match:
+      tool: write
+      path_matches: "^(src|tests)/"
+    action: allow
+
+  - id: deny-other-writes
+    match:
+      tool: write
+    action: deny
+
+  - id: deny-network-side-effects
+    match:
+      tool: shell
+      command: "(curl|wget|scp|rsync)"
+    action: deny</code></pre>
+
+      <p>That is boring by design. Boring policies are easier to reason about than “smart” policies with too many exceptions.</p>
+
+      <h2>Where this helps most</h2>
+      <p>This approach is useful when Claude Code is running in one of these modes:</p>
+      <ul>
+        <li>Inside a real repository with deployment scripts, infrastructure code, or secrets nearby.</li>
+        <li>In CI or a shared runner where accidental shell access has a larger blast radius.</li>
+        <li>As part of a repeated workflow where you want the same controls every run.</li>
+        <li>On teams that need a reviewable record of agent behavior.</li>
+      </ul>
+
+      <div class="note">
+        <strong>Important limitation:</strong> rule packs reduce risk, but they do not make the agent trustworthy by default. If you allow broad shell access, weak patterns, or writes across the whole repo, the protection layer will reflect those choices.
+      </div>
+
+      <h2>Honest limitations</h2>
+      <p>There are a few practical limits worth stating clearly.</p>
+      <ul>
+        <li>Regex-based command matching is only as good as the patterns you write. If your rules are sloppy, bypasses become more likely.</li>
+        <li>Logging tool calls does not automatically capture intent. You still need human review for high-risk workflows.</li>
+        <li>Path restrictions help a lot, but shell commands can have indirect effects that are harder to model than simple file writes.</li>
+        <li>Agent wrappers are strongest when paired with OS-level isolation such as containers, restricted tokens, or ephemeral workspaces.</li>
+      </ul>
+
+      <p>So Claude Code safety should be treated as layered defense: runtime guardrails, audit logs, limited credentials, and an execution environment with a small blast radius.</p>
+
+      <h2>A practical team baseline</h2>
+      <p>If you need a starting point for a small engineering team, this is a reasonable baseline:</p>
+
+      <pre><code>1. Run every Claude Code session through agentcheck.
+2. Log all tool calls to a per-run JSONL file.
+3. Deny network writes and remote git operations by default.
+4. Restrict writes to a narrow set of project directories.
+5. Review denied events weekly and refine the rule pack.
+6. Use separate credentials or no credentials for agent sessions.</code></pre>
+
+      <p>That setup will not solve every edge case, but it will catch a large class of expensive mistakes and make the remaining ones easier to investigate.</p>
+
+      <div class="cta">
+        <p><strong>Want a concrete way to improve Claude Code safety?</strong> Start by wrapping your next agent run with <code>agentcheck</code>, add a small YAML rule pack, and inspect the JSONL output after a real task. The project is on GitHub: <a href="https://github.com/paprika-org/agentcheck">github.com/paprika-org/agentcheck</a>.</p>
+      </div>
+
+      <div class="footer">
+        Canonical URL: <a href="https://paprika-org.github.io/agentcheck/blog-safety.html">https://paprika-org.github.io/agentcheck/blog-safety.html</a>
+      </div>
+    </article>
+  </div>
+</body>
+</html>
