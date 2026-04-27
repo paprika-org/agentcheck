@@ -1,63 +1,62 @@
 # AgentCheck
 
-[![CI](https://github.com/paprika-org/agentcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/paprika-org/agentcheck/actions/workflows/ci.yml)
-[![Website](https://img.shields.io/badge/site-paprika--org.github.io%2Fagentcheck-blue)](https://paprika-org.github.io/agentcheck/)
-[![Blog](https://img.shields.io/badge/blog-AI%20agents%20take%20shortcuts-orange)](https://paprika-org.github.io/agentcheck/blog.html)
+AI coding agents take shortcuts when you stop watching.
+They call hacks "pragmatic," blame "pre-existing issues," and delete failing tests to get to green.
+AgentCheck is a stdin/stdout proxy that sits in front of the agent and pushes back before those changes land.
 
-> "All of my unsupervised worker agents have sidecars that inject messages when thinking tokens match some heuristics. Any time Opus says 'pragmatic', it's instant — 'Pragmatic fix is always wrong, do the Correct fix'."
->
-> — gck1 on Hacker News, April 2026
 
-Your AI coding agent will take shortcuts. It'll call them "pragmatic fixes." It'll blame "pre-existing issues." It'll delete a failing test rather than fix it. When you're watching, you catch these. When you're not, it ships them.
 
-AgentCheck is a stdin/stdout proxy that intercepts bad patterns in your agent's output and injects corrections — before the damage is done.
+```text
+┌───────────────────────────────────────────────────────────────┐
+│ Without AgentCheck                                            │
+│ Agent: "I'll use a pragmatic fix here..."                     │
+│ Agent: [adds a workaround]                                    │
+│ Agent: "Tests were flaky, so I removed one."                  │
+│ Agent: "Done."                                                │
+│ You: [return later and sort out the damage]                   │
+└───────────────────────────────────────────────────────────────┘
 
+┌───────────────────────────────────────────────────────────────┐
+│ With AgentCheck                                               │
+│ Agent: "I'll use a pragmatic fix here..."                     │
+│ ↳ [agentcheck]: "Do the correct fix. If it is bigger, ask."   │
+│ Agent: "You're right. Let me fix the root cause."             │
+│ Agent: [keeps the test and fixes the failure]                 │
+│ You: [review a normal diff]                                   │
+└───────────────────────────────────────────────────────────────┘
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│  Without AgentCheck                                                  │
-│                                                                      │
-│  Agent: "I'll apply a pragmatic fix here..."                        │
-│  Agent: [writes hacky workaround]                                   │
-│  Agent: "Done ✓"                                                    │
-│                                                                      │
-│  You: [comes back an hour later to review garbage]                  │
-└─────────────────────────────────────────────────────────────────────┘
 
-┌─────────────────────────────────────────────────────────────────────┐
-│  With AgentCheck                                                     │
-│                                                                      │
-│  Agent: "I'll apply a pragmatic fix here..."                        │
-│  ↳ [agentcheck injects]: "Reminder: do the correct fix, not a      │
-│    pragmatic shortcut. If complex, explain and ask first."          │
-│  Agent: "You're right. Let me think about the proper approach..."  │
-│  Agent: [writes correct solution]                                   │
-└─────────────────────────────────────────────────────────────────────┘
-```
+
 
 ## Install
 
 ```bash
-npm install -g agentcheck
-```
-
-Or without installing:
-
-```bash
-npx agentcheck -- claude
+npm install -g github:paprika-org/agentcheck
 ```
 
 ## Usage
 
-Just prefix your agent command with `agentcheck --`:
-
 ```bash
-# Try it first — see what would fire without injecting anything
-agentcheck --shadow -- claude
-
-# Wrap Claude Code (live corrections)
 agentcheck -- claude
+```
 
-# With verbose logging (see what's being intercepted)
+Put `agentcheck --` in front of the agent command you already use.
+
+
+
+
+
+
+
+## Star This Repo
+
+If this saved you from a runaway session, star it — helps others find it.
+
+GitHub: https://github.com/paprika-org/agentcheck
+
+[![CI](https://github.com/paprika-org/agentcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/paprika-org/agentcheck/actions/workflows/ci.yml)
+[![Website](https://img.shields.io/badge/site-paprika--org.github.io%2Fagentcheck-blue)](https://paprika-org.github.io/agentcheck/)
+[![Blog](https://img.shields.io/badge/blog-AI%20agents%20take%20shortcuts-orange)](https://paprika-org.github.io/agentcheck/blog.html)
 agentcheck -v -- claude
 
 # Any CLI agent works
