@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code agent governance: practical guardrails, logs, and rule packs</title>
+  <meta name="description" content="A developer-focused guide to Claude Code agent governance with AgentCheck: hook-based guardrails, JSONL audit logs, YAML rule packs, installation, examples, and operational limits.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-agent-governance.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Claude Code agent governance: practical guardrails, logs, and rule packs">
+  <meta property="og:description" content="A developer-focused guide to Claude Code agent governance with AgentCheck: hook-based guardrails, JSONL audit logs, YAML rule packs, installation, examples, and operational limits.">
+  <meta property="og:url" content="https://paprika-org.github.io/agentcheck/blog-agent-governance.html">
+  <meta property="og:site_name" content="agentcheck">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --link: #7dd3fc;
+      --accent: #f59e0b;
+      --border: #24304d;
+      --code-bg: #0f172a;
+      --success: #86efac;
+      --max: 780px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top right, rgba(125, 211, 252, 0.08), transparent 26%),
+        radial-gradient(circle at top left, rgba(245, 158, 11, 0.07), transparent 22%),
+        linear-gradient(180deg, #0b1020 0%, #0d1326 100%);
+      line-height: 1.72;
+    }
+
+    a {
+      color: var(--link);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .shell {
+      max-width: calc(var(--max) + 56px);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      margin-bottom: 24px;
+      font-size: 0.98rem;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    article {
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 36px 30px;
+      background: linear-gradient(180deg, rgba(18, 26, 47, 0.96), rgba(15, 23, 42, 0.98));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 18px 50px rgba(0, 0, 0, 0.32);
+    }
+
+    .eyebrow {
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      font-size: 0.78rem;
+      margin-bottom: 10px;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+
+    h1, h2, h3 {
+      line-height: 1.2;
+      margin: 0 0 14px;
+    }
+
+    h1 {
+      font-size: 2.35rem;
+      margin-bottom: 10px;
+    }
+
+    h2 {
+      font-size: 1.52rem;
+      margin-top: 34px;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+      margin-top: 24px;
+    }
+
+    p, li {
+      font-size: 1.03rem;
+    }
+
+    p {
+      margin: 0 0 16px;
+    }
+
+    ul {
+      margin: 0 0 18px 22px;
+      padding: 0;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+
+    strong {
+      color: #f3f4f6;
+    }
+
+    code, pre {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.93rem;
+    }
+
+    pre {
+      margin: 18px 0 22px;
+      padding: 16px 18px;
+      overflow-x: auto;
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      color: var(--text);
+    }
+
+    code {
+      color: #dbeafe;
+    }
+
+    .note {
+      padding: 14px 16px;
+      margin: 18px 0 22px;
+      background: rgba(134, 239, 172, 0.06);
+      border: 1px solid rgba(134, 239, 172, 0.24);
+      border-radius: 12px;
+      color: var(--text);
+    }
+
+    .cta {
+      margin-top: 34px;
+      padding: 18px 20px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.26);
+      border-radius: 14px;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    @media (max-width: 720px) {
+      .shell {
+        padding: 16px;
+      }
+
+      article {
+        padding: 26px 20px;
+      }
+
+      h1 {
+        font-size: 1.95rem;
+      }
+
+      nav {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav-links {
+        gap: 14px;
+      }
+    }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","headline":"Claude Code agent governance: practical guardrails, logs, and rule packs","description":"A developer-focused guide to Claude Code agent governance with AgentCheck: hook-based guardrails, JSONL audit logs, YAML rule packs, installation, examples, and operational limits.","url":"https://paprika-org.github.io/agentcheck/blog-agent-governance.html","datePublished":"2026-05-02","dateModified":"2026-05-02","publisher":{"@type":"Organization","name":"agentcheck"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is Claude Code agent governance?","acceptedAnswer":{"@type":"Answer","text":"Claude Code agent governance is the practice of defining technical controls around an agent session, including tool restrictions, execution logging, approval boundaries, and machine-readable rules that limit risky behavior."}},{"@type":"Question","name":"Can AgentCheck block dangerous Claude Code commands?","acceptedAnswer":{"@type":"Answer","text":"Yes. AgentCheck can wrap Claude Code processes, inspect tool calls through hooks, and enforce YAML rule packs that deny or constrain commands, file access patterns, and other actions before they execute."}},{"@type":"Question","name":"Where are AgentCheck audit logs stored?","acceptedAnswer":{"@type":"Answer","text":"AgentCheck logs tool activity to JSONL so each event is appended as a structured line. The exact path depends on your configuration, but the format is designed for local review and downstream ingestion into log pipelines."}},{"@type":"Question","name":"Is Claude Code agent governance the same as sandboxing?","acceptedAnswer":{"@type":"Answer","text":"No. Sandboxing isolates runtime capabilities at the operating system or container level, while agent governance adds behavioral policy, auditability, and higher-level rules about what the agent should and should not attempt."}}]}
+  </script>
+  <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+  <div class="shell">
+    <nav>
+      <a class="brand" href="index.html">agentcheck</a>
+      <div class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+      </div>
+    </nav>
+
+    <article>
+      <div class="eyebrow">Engineering Guide</div>
+      <h1>Claude Code agent governance: practical guardrails, logs, and rule packs</h1>
+      <div class="meta">Published May 2, 2026 · For developers running autonomous or semi-autonomous coding agents</div>
+
+      <p>Claude Code agent governance matters as soon as an agent can run shell commands, edit files, or call tools on your machine. The problem is not abstract: once an agent has enough autonomy to be useful, it also has enough autonomy to make a bad assumption at scale. A workable governance layer needs to do three things well: constrain behavior before execution, record actions after execution, and stay simple enough that developers will actually keep it enabled.</p>
+
+      <p>AgentCheck is one approach aimed specifically at this gap. It wraps each Claude process with hook-based guardrails, logs tool calls to JSONL, and enforces rule packs defined in YAML. That design is useful because it does not require you to rewrite the agent, build a separate proxy service, or depend on a UI dashboard just to understand what happened.</p>
+
+      <p>This post walks through Claude Code agent governance from a practical perspective: what should be governed, how AgentCheck fits into the execution path, what configuration looks like, and where the limits are. The goal is not to present a perfect safety story. The goal is to give you a technical pattern that is auditable, inspectable, and good enough to use in real development workflows.</p>
+
+      <h2>Why Claude Code agent governance is an engineering problem, not a policy document</h2>
+      <p>Most teams start with written rules such as “don’t modify production credentials” or “don’t run destructive commands without approval.” Those rules are fine for humans, but they are weak controls for agents. If the only enforcement point is the prompt, governance is effectively advisory.</p>
+
+      <p>For developers, useful Claude Code agent governance typically covers four surfaces:</p>
+      <ul>
+        <li><strong>Tool execution</strong>: which commands, file operations, or integrations are allowed.</li>
+        <li><strong>Scope boundaries</strong>: which directories, repos, or file patterns are writable.</li>
+        <li><strong>Auditability</strong>: whether every tool call is captured with enough context to reconstruct the session.</li>
+        <li><strong>Policy portability</strong>: whether rules can be versioned in Git and reviewed like code.</li>
+      </ul>
+
+      <p>That last point is easy to underestimate. If your governance logic only lives in a local shell alias or undocumented wrapper script, nobody can review changes to it. YAML rule packs are not magical, but they are easy to diff, test, and distribute across environments.</p>
+
+      <h2>How AgentCheck implements Claude Code agent governance</h2>
+      <p>AgentCheck sits around the Claude process rather than inside the model. In practice, that means you keep using Claude Code, but the session runs with a behavioral governance layer attached. Hooks observe tool activity, JSONL provides a durable event stream, and rule packs define the policy.</p>
+
+      <p>The basic install path is straightforward:</p>
+
+      <pre><code>npm install -g github:paprika-org/agentcheck
+
+# Example invocation pattern
+agentcheck --rules ./rules/dev-safe.yaml --log ./logs/agentcheck.jsonl -- claude</code></pre>
+
+      <p>A minimal rule pack might look like this:</p>
+
+      <pre><code>version: 1
+name: dev-safe
+rules:
+  - id: deny-destructive-shell
+    match:
+      tool: shell
+      commandRegex: '(^|[;&amp;|[:space:]])(rm -rf /|mkfs|shutdown|reboot)([;&amp;|[:space:]]|$)'
+    action: deny
+    message: "Destructive system commands are blocked."
+
+  - id: restrict-env-files
+    match:
+      tool: write_file
+      pathRegex: '(^|/)\.env(\..+)?$'
+    action: deny
+    message: "Direct edits to environment files are not allowed."
+
+  - id: allow-project-work
+    match:
+      tool: write_file
+      pathRegex: '^/workspace/project/'
+    action: allow</code></pre>
+
+      <p>The value in this pattern is operational clarity. If a session is blocked, you can inspect the matching rule. If a session succeeds, you can inspect the emitted log. You do not need to infer everything from agent chat transcripts.</p>
+
+      <p>JSONL is a strong choice for logging because it is append-only, grep-friendly, and easy to forward into existing systems. A typical event stream might include timestamps, tool names, arguments, decision outcomes, and rule identifiers. That is enough to answer the questions developers usually have after the fact: <em>what command actually ran, which rule allowed it, and what happened immediately before it?</em></p>
+
+      <div class="note">
+        Governance is not the same as trustlessness. If the wrapped process has broad host permissions, rule enforcement should be treated as a strong application-layer control, not a substitute for OS isolation.
+      </div>
+
+      <h2>Setting up rule packs that developers will keep using</h2>
+      <p>The failure mode for many governance systems is overreach. If rules are too broad, developers disable them. If rules are too vague, they do not protect anything. In practice, Claude Code agent governance works best when rules are narrow, explicit, and tied to concrete risks.</p>
+
+      <p>A useful starting set usually includes:</p>
+      <ul>
+        <li>Deny destructive shell commands outright.</li>
+        <li>Block writes to secrets, SSH material, and deployment manifests.</li>
+        <li>Limit file writes to the current repo or workspace subtree.</li>
+        <li>Require explicit allow rules for high-risk tools.</li>
+        <li>Keep logs on by default for every session, including local development.</li>
+      </ul>
+
+      <p>It is also worth separating rules by context. A local prototype, a CI verification run, and a documentation-only agent should not share the same policy file. Smaller rule packs are easier to reason about, and context-specific packs reduce the temptation to add sprawling exceptions.</p>
+
+      <p>One practical workflow is to store policies under a directory such as <code>./agentcheck/</code>, review them in pull requests, and couple changes to incidents or new classes of agent behavior. If an agent was allowed to modify a file it should not have touched, the remediation should include a rule update and a regression test around that policy.</p>
+
+      <pre><code>$ tail -n 3 ./logs/agentcheck.jsonl
+{"ts":"2026-05-02T10:14:11Z","tool":"shell","args":{"command":"git status --short"},"decision":"allow","ruleId":"allow-readonly-shell"}
+{"ts":"2026-05-02T10:14:16Z","tool":"write_file","args":{"path":"/workspace/project/src/config.ts"},"decision":"allow","ruleId":"allow-project-work"}
+{"ts":"2026-05-02T10:14:22Z","tool":"write_file","args":{"path":"/workspace/project/.env"},"decision":"deny","ruleId":"restrict-env-files"}</code></pre>
+
+      <p>This kind of output is enough for incident review without requiring a heavyweight platform. You can diff policy changes, grep logs, and answer whether a behavior was blocked by design or merely happened not to occur.</p>
+
+      <h2>Limitations and honest tradeoffs of Claude Code agent governance</h2>
+      <p>Claude Code agent governance reduces risk, but it does not eliminate it. There are at least four limits developers should plan around.</p>
+
+      <p>First, governance at the process layer is not a replacement for sandboxing. If the wrapped process can already reach sensitive paths, networks, or credentials, then your rule pack is enforcing behavior inside a trusted boundary. That is useful, but it is not the same thing as hard isolation.</p>
+
+      <p>Second, pattern-based policy can miss intent. Denying <code>rm -rf /</code> is easy. Identifying a subtle but dangerous repository-specific command is harder. Good policies evolve from observed usage, not from trying to predict every possible bad action up front.</p>
+
+      <p>Third, audit logs create their own operational responsibility. If you log command arguments, file paths, or snippets of content, you need to think about retention and sensitivity. JSONL is easy to process, which is exactly why you should decide where those files live and who can read them.</p>
+
+      <p>Fourth, policy friction is real. If your rules block common refactors or produce noisy false positives, developers will route around them. The design goal should be “safe by default, boring to operate,” not “maximally restrictive at all times.”</p>
+
+      <p>In other words, the best Claude Code agent governance setup is layered: AgentCheck for behavioral controls and auditability, sandboxing for system boundaries, and repository practices such as branch protection or CI checks for downstream verification.</p>
+
+      <h2>Common mistakes and troubleshooting</h2>
+      <p><strong>1. Rules only deny obvious shell commands.</strong> Teams often focus on a short list of destructive commands and ignore file-level operations. That leaves gaps where an agent can still alter lockfiles, deployment configs, or secrets through other tools. Add path-based rules, not just command regexes.</p>
+
+      <p><strong>2. Log files are enabled but never reviewed.</strong> Logging without review is just storage. At minimum, validate that denied actions show up as expected and that allowed actions include enough context for debugging. Run a few controlled violations during setup so you know the pipeline is working.</p>
+
+      <p><strong>3. The policy is too global.</strong> A single monolithic rule pack for all workflows usually becomes unreadable. Split policies by mode, such as <code>docs-only</code>, <code>repo-write</code>, or <code>ci-verify</code>, and keep each one small.</p>
+
+      <p><strong>4. Governance is expected to replace code review.</strong> It does not. Agent governance can stop certain classes of bad behavior and produce a better audit trail, but it will not tell you whether a migration is logically correct or whether a refactor introduced a race condition.</p>
+
+      <p>If troubleshooting a blocked session, check three things in order: the exact tool call emitted, the rule that matched, and whether the path or command normalization in your rule pack reflects real runtime values. Many policy bugs turn out to be mismatched paths or an overly broad regex.</p>
+
+      <h2>Operational advice for teams adopting Claude Code agent governance</h2>
+      <p>Start in report-first mode if needed, but do not stay there forever. Logging-only rollout helps you see what agents actually attempt, which is valuable input for building sane policies. After a short observation period, promote the obvious high-risk cases to deny rules.</p>
+
+      <p>Keep rule changes in the same repository review process as application code. A governance layer that can silently change outside normal engineering workflows is hard to trust. Pair each nontrivial policy change with a short rationale in the commit message or a neighboring README.</p>
+
+      <p>Finally, measure governance quality by developer outcomes: fewer accidental file touches, faster incident reconstruction, and clearer boundaries for autonomous tasks. If a policy system cannot explain why it blocked or allowed an action, it will not hold up under real operational pressure.</p>
+
+      <h2>Frequently Asked Questions</h2>
+
+      <h3>What is Claude Code agent governance?</h3>
+      <p>Claude Code agent governance is the practice of defining technical controls around an agent session, including tool restrictions, execution logging, approval boundaries, and machine-readable rules that limit risky behavior.</p>
+
+      <h3>Can AgentCheck block dangerous Claude Code commands?</h3>
+      <p>Yes. AgentCheck can wrap Claude Code processes, inspect tool calls through hooks, and enforce YAML rule packs that deny or constrain commands, file access patterns, and other actions before they execute.</p>
+
+      <h3>Where are AgentCheck audit logs stored?</h3>
+      <p>AgentCheck logs tool activity to JSONL so each event is appended as a structured line. The exact path depends on your configuration, but the format is designed for local review and downstream ingestion into log pipelines.</p>
+
+      <h3>Is Claude Code agent governance the same as sandboxing?</h3>
+      <p>No. Sandboxing isolates runtime capabilities at the operating system or container level, while agent governance adds behavioral policy, auditability, and higher-level rules about what the agent should and should not attempt.</p>
+
+      <div class="cta">
+        <p><strong>Next step:</strong> if you want a concrete starting point for Claude Code agent governance, install AgentCheck, create a minimal denylist-plus-scope rule pack, and review a few JSONL logs from real sessions. The project is on <a href="https://github.com/paprika-org/agentcheck">GitHub</a>.</p>
+      </div>
+    </article>
+  </div>
+</body>
+</html>
