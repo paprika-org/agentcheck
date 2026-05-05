@@ -168,7 +168,7 @@
   "description": "Claude Code permissions not working? This post explains why settings.json deny rules are useful but incomplete, and why runtime monitoring helps catch behavior static claude code permissions rules miss.",
   "url": "https://paprika-org.github.io/agentcheck/blog-permissions.html",
   "datePublished": "2026-04-20",
-  "dateModified": "2026-04-24",
+  "dateModified": "2026-05-05",
   "publisher": {
     "@type": "Organization",
     "name": "agentcheck"
@@ -176,6 +176,63 @@
 }
 </script>
   <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+    <style>
+      .faq { margin-top: 2.5em; border-top: 1px solid var(--border); padding-top: 1.5em; }
+      .faq h2 { font-size: 1.15rem; margin-bottom: 1em; }
+      .faq-list { margin: 0; padding: 0; }
+      .faq-item { margin-bottom: 1.2em; }
+      .faq-item dt { font-weight: 700; color: var(--accent); margin-bottom: 0.3em; }
+      .faq-item dd { margin: 0; color: var(--muted); line-height: 1.65; }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What does \"Claude Code permissions not working\" actually mean?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Usually, \"claude code permissions not working\" means Claude Code is still prompting, blocking, or ignoring rules you expected from `settings.json` or the active permission mode. In practice, that can look like allowed tools still asking for approval, denied tools still being attempted, or protected paths such as `.git` and `.claude` still triggering prompts."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I fix Claude Code permissions not working?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Start by opening `/permissions` or checking your `.claude/settings.json`, `.claude/settings.local.json`, and `~/.claude/settings.json` to confirm which rule is actually winning. Claude Code evaluates rules in `deny -> ask -> allow` order, and higher-precedence settings can override lower ones, so a project or managed deny rule will make Claude Code permissions seem broken even when your user config says allow."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is Claude Code still asking for permission when bypass is enabled?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This happens because `bypassPermissions` does not override every safeguard, and deny rules still take precedence. Claude Code also keeps extra protection around sensitive directories like `.git`, `.claude`, `.vscode`, and `.idea`, so users often think Claude Code permissions are not working when the real issue is protected-path behavior by design."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What can I use instead if Claude Code permissions are not working?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If Claude Code permissions are unreliable for your workflow, try `acceptEdits` for smoother file changes, or `auto` mode if your setup supports it and you want fewer manual approvals. Another practical alternative is tightening explicit `allow`, `ask`, and `deny` rules instead of relying on `--dangerously-skip-permissions`, which can be less predictable for some Claude Code permission edge cases."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is one practical tip when Claude Code permissions are not working in a repo?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Keep permission rules narrow and test one tool or path at a time, such as `Bash(git diff:*)` or `Read(./secrets/**)`, before adding broader patterns. A common reason Claude Code permissions are not working is that Bash matching is prefix-based and config can come from multiple scopes, so smaller rules make it much easier to see what is failing and why."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <div class="wrap">
@@ -273,6 +330,47 @@
         <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
       </ul>
     </div>
+    
+    <div class="related-posts" data-generated="build-internal-links" style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);">
+      <h2 style="font-size:1rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.6;margin:0 0 12px;">Related posts</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-parallel-agents.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code parallel agents</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-session-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code session monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-audit-log.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code audit log</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-multiagent.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code multi-agent</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code hooks tutorial</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-guardrails.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code guardrails</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code tool use monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-agent-governance.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code agent governance</a></li>
+      </ul>
+    </div>
+    
+    <section class="faq" aria-label="Frequently Asked Questions">
+      <h2>Frequently Asked Questions</h2>
+      <dl class="faq-list">
+    <div class="faq-item">
+      <dt>What does &quot;Claude Code permissions not working&quot; actually mean?</dt>
+      <dd>Usually, &quot;claude code permissions not working&quot; means Claude Code is still prompting, blocking, or ignoring rules you expected from `settings.json` or the active permission mode. In practice, that can look like allowed tools still asking for approval, denied tools still being attempted, or protected paths such as `.git` and `.claude` still triggering prompts.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>How do I fix Claude Code permissions not working?</dt>
+      <dd>Start by opening `/permissions` or checking your `.claude/settings.json`, `.claude/settings.local.json`, and `~/.claude/settings.json` to confirm which rule is actually winning. Claude Code evaluates rules in `deny -&gt; ask -&gt; allow` order, and higher-precedence settings can override lower ones, so a project or managed deny rule will make Claude Code permissions seem broken even when your user config says allow.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>Why is Claude Code still asking for permission when bypass is enabled?</dt>
+      <dd>This happens because `bypassPermissions` does not override every safeguard, and deny rules still take precedence. Claude Code also keeps extra protection around sensitive directories like `.git`, `.claude`, `.vscode`, and `.idea`, so users often think Claude Code permissions are not working when the real issue is protected-path behavior by design.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What can I use instead if Claude Code permissions are not working?</dt>
+      <dd>If Claude Code permissions are unreliable for your workflow, try `acceptEdits` for smoother file changes, or `auto` mode if your setup supports it and you want fewer manual approvals. Another practical alternative is tightening explicit `allow`, `ask`, and `deny` rules instead of relying on `--dangerously-skip-permissions`, which can be less predictable for some Claude Code permission edge cases.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What is one practical tip when Claude Code permissions are not working in a repo?</dt>
+      <dd>Keep permission rules narrow and test one tool or path at a time, such as `Bash(git diff:*)` or `Read(./secrets/**)`, before adding broader patterns. A common reason Claude Code permissions are not working is that Bash matching is prefix-based and config can come from multiple scopes, so smaller rules make it much easier to see what is failing and why.</dd>
+    </div>
+      </dl>
+    </section>
     </article>
   </div>
 

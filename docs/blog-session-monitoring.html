@@ -220,7 +220,7 @@
   "description": "Claude Code session monitoring explained: see tool calls in real time, track agent activity, and review a full local session log with agentcheck.",
   "url": "https://paprika-org.github.io/agentcheck/blog-session-monitoring.html",
   "datePublished": "2026-04-21",
-  "dateModified": "2026-04-24",
+  "dateModified": "2026-05-05",
   "publisher": {
     "@type": "Organization",
     "name": "agentcheck"
@@ -228,6 +228,63 @@
 }
 </script>
   <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+    <style>
+      .faq { margin-top: 2.5em; border-top: 1px solid var(--border); padding-top: 1.5em; }
+      .faq h2 { font-size: 1.15rem; margin-bottom: 1em; }
+      .faq-list { margin: 0; padding: 0; }
+      .faq-item { margin-bottom: 1.2em; }
+      .faq-item dt { font-weight: 700; color: var(--accent); margin-bottom: 0.3em; }
+      .faq-item dd { margin: 0; color: var(--muted); line-height: 1.65; }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Claude Code session monitoring?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code session monitoring is the process of tracking what happens during a Claude Code session, including prompts, tool calls, token usage, cost, and session IDs. It usually relies on OpenTelemetry so teams can send Claude Code activity to their own observability stack. This makes session monitoring useful for debugging, auditing, and understanding how agents behave over time."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I set up Claude Code session monitoring?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To use Claude Code session monitoring, you typically configure OpenTelemetry exporters and point them to your collector or monitoring backend. Once enabled, Claude Code can emit metrics and events such as session count, tool results, API requests, and active time. If data is missing, start a fresh session after changing settings because monitoring config is often loaded at session start."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is Claude Code session monitoring not showing any data?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code session monitoring may show no data if the OTEL environment variables are missing, the collector endpoint is wrong, or logs and metrics exporters are not enabled correctly. It can also happen when prompt or tool detail logging is redacted by default, so you see partial observability instead of full session traces. Checking exporter settings, session restart behavior, and collector connectivity usually fixes the issue."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the alternatives to Claude Code session monitoring?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Alternatives to Claude Code session monitoring include using your own CLI wrappers, shell history, CI logs, or external observability tools that capture agent runs at the infrastructure level. Some teams also compare Claude Code monitoring with session tracing or event timelines available in other agent platforms. The tradeoff is that alternatives may miss Claude-specific details like tool decisions, token usage, or session-level metadata."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a practical tip for better Claude Code session monitoring?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A practical tip for Claude Code session monitoring is to keep session IDs, tool results, and cost metrics together in the same dashboard so you can trace behavior from one run to the next. Enable only the detail you need, because full prompt and tool logging can create noise and raise privacy concerns. For most teams, the best starting point is monitoring session count, API errors, active time, and permission decisions."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <nav class="nav">
@@ -381,6 +438,47 @@ claude --no-strict-mode</pre>
         <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
       </ul>
     </div>
+    
+    <div class="related-posts" data-generated="build-internal-links" style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);">
+      <h2 style="font-size:1rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.6;margin:0 0 12px;">Related posts</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-parallel-agents.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code parallel agents</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-audit-log.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code audit log</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-multiagent.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code multi-agent</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-permissions.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code permissions not working</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code hooks tutorial</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-guardrails.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code guardrails</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code tool use monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-agent-governance.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code agent governance</a></li>
+      </ul>
+    </div>
+    
+    <section class="faq" aria-label="Frequently Asked Questions">
+      <h2>Frequently Asked Questions</h2>
+      <dl class="faq-list">
+    <div class="faq-item">
+      <dt>What is Claude Code session monitoring?</dt>
+      <dd>Claude Code session monitoring is the process of tracking what happens during a Claude Code session, including prompts, tool calls, token usage, cost, and session IDs. It usually relies on OpenTelemetry so teams can send Claude Code activity to their own observability stack. This makes session monitoring useful for debugging, auditing, and understanding how agents behave over time.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>How do I set up Claude Code session monitoring?</dt>
+      <dd>To use Claude Code session monitoring, you typically configure OpenTelemetry exporters and point them to your collector or monitoring backend. Once enabled, Claude Code can emit metrics and events such as session count, tool results, API requests, and active time. If data is missing, start a fresh session after changing settings because monitoring config is often loaded at session start.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>Why is Claude Code session monitoring not showing any data?</dt>
+      <dd>Claude Code session monitoring may show no data if the OTEL environment variables are missing, the collector endpoint is wrong, or logs and metrics exporters are not enabled correctly. It can also happen when prompt or tool detail logging is redacted by default, so you see partial observability instead of full session traces. Checking exporter settings, session restart behavior, and collector connectivity usually fixes the issue.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What are the alternatives to Claude Code session monitoring?</dt>
+      <dd>Alternatives to Claude Code session monitoring include using your own CLI wrappers, shell history, CI logs, or external observability tools that capture agent runs at the infrastructure level. Some teams also compare Claude Code monitoring with session tracing or event timelines available in other agent platforms. The tradeoff is that alternatives may miss Claude-specific details like tool decisions, token usage, or session-level metadata.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What is a practical tip for better Claude Code session monitoring?</dt>
+      <dd>A practical tip for Claude Code session monitoring is to keep session IDs, tool results, and cost metrics together in the same dashboard so you can trace behavior from one run to the next. Enable only the detail you need, because full prompt and tool logging can create noise and raise privacy concerns. For most teams, the best starting point is monitoring session count, API errors, active time, and permission decisions.</dd>
+    </div>
+      </dl>
+    </section>
     </article>
   </main>
 

@@ -204,7 +204,7 @@
   "description": "A practical guide to Claude code tool use monitoring with JSONL logs, hook-based guardrails, and YAML rule packs using agentcheck. Includes real commands, examples, and limitations.",
   "url": "https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html",
   "datePublished": "2026-04-23",
-  "dateModified": "2026-04-24",
+  "dateModified": "2026-05-05",
   "publisher": {
     "@type": "Organization",
     "name": "agentcheck"
@@ -212,6 +212,63 @@
 }
 </script>
   <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+    <style>
+      .faq { margin-top: 2.5em; border-top: 1px solid var(--border); padding-top: 1.5em; }
+      .faq h2 { font-size: 1.15rem; margin-bottom: 1em; }
+      .faq-list { margin: 0; padding: 0; }
+      .faq-item { margin-bottom: 1.2em; }
+      .faq-item dt { font-weight: 700; color: var(--accent); margin-bottom: 0.3em; }
+      .faq-item dd { margin: 0; color: var(--muted); line-height: 1.65; }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Claude Code tool use monitoring?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code tool use monitoring is the practice of tracking which tools an AI coding agent calls, what arguments it passes, and what actions it takes during a session. For teams using Claude Code, this helps surface risky commands, permission gaps, and unexpected agent behavior. In the context of claude code tool use monitoring, the goal is usually better security, debugging, and auditability."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I fix Claude Code tool use monitoring if it is not catching actions?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If claude code tool use monitoring is missing events, start by checking whether your monitor is attached to the actual tool execution layer rather than only reading static config or prompts. Many gaps happen when sub-agents, dynamic arguments, or wrapper scripts bypass the expected logging path. A reliable fix is to capture runtime tool calls with timestamps, tool names, arguments, and outcomes so you can see what really happened."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Claude Code use tools I did not expect?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "This usually happens because AI agents choose tools dynamically based on the task, not from a fixed script. Claude Code may select a shell command, file read, or web action that was logically available even if you did not anticipate that exact path. That is why claude code tool use monitoring matters: it shows real runtime behavior instead of relying only on assumed permissions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the alternatives to Claude Code tool use monitoring?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Alternatives include static allowlists, deny rules, sandboxing, wrapper scripts, and full session logging platforms. These can help, but they often miss context about why a tool was called or whether the call succeeded. Compared with static controls alone, claude code tool use monitoring gives more actionable visibility into agent tool usage and misuse."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a practical tip for Claude Code tool use monitoring?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A practical tip is to review a few real agent runs and build alert rules from actual tool patterns instead of hypothetical ones. For example, flag repeated shell retries, file writes outside expected directories, or web calls during sensitive workflows. This makes claude code tool use monitoring more useful for both debugging and security without creating noisy logs."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <div class="shell">
@@ -372,6 +429,47 @@ jq 'select(.tool == "shell") | {ts, cmd: .args.cmd, decision, rule}' agentcheck.
         <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
       </ul>
     </div>
+    
+    <div class="related-posts" data-generated="build-internal-links" style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);">
+      <h2 style="font-size:1rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.6;margin:0 0 12px;">Related posts</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-parallel-agents.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code parallel agents</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-session-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code session monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-audit-log.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code audit log</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-multiagent.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code multi-agent</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-permissions.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code permissions not working</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code hooks tutorial</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-guardrails.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code guardrails</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-agent-governance.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code agent governance</a></li>
+      </ul>
+    </div>
+    
+    <section class="faq" aria-label="Frequently Asked Questions">
+      <h2>Frequently Asked Questions</h2>
+      <dl class="faq-list">
+    <div class="faq-item">
+      <dt>What is Claude Code tool use monitoring?</dt>
+      <dd>Claude Code tool use monitoring is the practice of tracking which tools an AI coding agent calls, what arguments it passes, and what actions it takes during a session. For teams using Claude Code, this helps surface risky commands, permission gaps, and unexpected agent behavior. In the context of claude code tool use monitoring, the goal is usually better security, debugging, and auditability.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>How do I fix Claude Code tool use monitoring if it is not catching actions?</dt>
+      <dd>If claude code tool use monitoring is missing events, start by checking whether your monitor is attached to the actual tool execution layer rather than only reading static config or prompts. Many gaps happen when sub-agents, dynamic arguments, or wrapper scripts bypass the expected logging path. A reliable fix is to capture runtime tool calls with timestamps, tool names, arguments, and outcomes so you can see what really happened.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>Why does Claude Code use tools I did not expect?</dt>
+      <dd>This usually happens because AI agents choose tools dynamically based on the task, not from a fixed script. Claude Code may select a shell command, file read, or web action that was logically available even if you did not anticipate that exact path. That is why claude code tool use monitoring matters: it shows real runtime behavior instead of relying only on assumed permissions.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What are the alternatives to Claude Code tool use monitoring?</dt>
+      <dd>Alternatives include static allowlists, deny rules, sandboxing, wrapper scripts, and full session logging platforms. These can help, but they often miss context about why a tool was called or whether the call succeeded. Compared with static controls alone, claude code tool use monitoring gives more actionable visibility into agent tool usage and misuse.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What is a practical tip for Claude Code tool use monitoring?</dt>
+      <dd>A practical tip is to review a few real agent runs and build alert rules from actual tool patterns instead of hypothetical ones. For example, flag repeated shell retries, file writes outside expected directories, or web calls during sensitive workflows. This makes claude code tool use monitoring more useful for both debugging and security without creating noisy logs.</dd>
+    </div>
+      </dl>
+    </section>
     </article>
   </div>
 </body>

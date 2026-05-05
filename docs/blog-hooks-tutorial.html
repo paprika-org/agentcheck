@@ -193,7 +193,7 @@
   "description": "A practical Claude Code hooks tutorial for developers who want guardrails, JSONL audit logs, and YAML rule packs using agentcheck.",
   "url": "https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html",
   "datePublished": "2026-04-23",
-  "dateModified": "2026-04-24",
+  "dateModified": "2026-05-05",
   "publisher": {
     "@type": "Organization",
     "name": "agentcheck"
@@ -201,6 +201,63 @@
 }
 </script>
   <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+    <style>
+      .faq { margin-top: 2.5em; border-top: 1px solid var(--border); padding-top: 1.5em; }
+      .faq h2 { font-size: 1.15rem; margin-bottom: 1em; }
+      .faq-list { margin: 0; padding: 0; }
+      .faq-item { margin-bottom: 1.2em; }
+      .faq-item dt { font-weight: 700; color: var(--accent); margin-bottom: 0.3em; }
+      .faq-item dd { margin: 0; color: var(--muted); line-height: 1.65; }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What are Claude Code hooks and how do they work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code hooks are event-driven scripts or commands that run automatically at specific points in a Claude Code workflow, such as before or after a tool call. In a claude code hooks tutorial, they are usually used to validate files, log actions, block risky commands, or trigger custom automations. They work by listening for predefined hook events and then executing the logic you configure."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I set up Claude Code hooks for a tutorial project?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To use Claude Code hooks in a tutorial project, start by defining the hook event you want to target and then attach a script or command that should run when that event fires. Most claude code hooks tutorial setups focus on simple actions first, like linting, formatting, or permission checks. If the hook is not running, verify the event name, file path, and executable permissions on the script."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why are my Claude Code hooks not firing?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code hooks usually fail to fire because the configured event does not match the actual workflow step, or because the hook command cannot execute in the current environment. In practice, claude code hooks issues often come from wrong paths, missing permissions, or syntax errors in the hook definition. Checking logs and testing the hook command manually is the fastest way to isolate the problem."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What can I use instead of Claude Code hooks?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Alternatives to Claude Code hooks include shell scripts, Git hooks, CI/CD pipelines, task runners, and external automation tools that run checks outside the Claude Code environment. These options can be better when you need broader team-wide enforcement or more predictable deployment behavior. A claude code hooks tutorial is still useful, though, because hooks are often the quickest way to add local workflow automation."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a good practical tip for using Claude Code hooks safely?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A strong practical tip is to keep each Claude Code hook small, deterministic, and easy to debug instead of building one large script that does everything. In a claude code hooks tutorial, the safest pattern is to start with read-only checks like validation or logging before adding blocking or write actions. That makes failures easier to trace and reduces the risk of unexpected behavior during normal development."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <div class="shell">
@@ -353,6 +410,47 @@ agentcheck --rules ./rules-enforce.yaml -- claude</code></pre>
         <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
       </ul>
     </div>
+    
+    <div class="related-posts" data-generated="build-internal-links" style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);">
+      <h2 style="font-size:1rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.6;margin:0 0 12px;">Related posts</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-parallel-agents.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code parallel agents</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-session-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code session monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-audit-log.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code audit log</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-multiagent.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code multi-agent</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-permissions.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code permissions not working</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-guardrails.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code guardrails</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code tool use monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-agent-governance.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code agent governance</a></li>
+      </ul>
+    </div>
+    
+    <section class="faq" aria-label="Frequently Asked Questions">
+      <h2>Frequently Asked Questions</h2>
+      <dl class="faq-list">
+    <div class="faq-item">
+      <dt>What are Claude Code hooks and how do they work?</dt>
+      <dd>Claude Code hooks are event-driven scripts or commands that run automatically at specific points in a Claude Code workflow, such as before or after a tool call. In a claude code hooks tutorial, they are usually used to validate files, log actions, block risky commands, or trigger custom automations. They work by listening for predefined hook events and then executing the logic you configure.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>How do I set up Claude Code hooks for a tutorial project?</dt>
+      <dd>To use Claude Code hooks in a tutorial project, start by defining the hook event you want to target and then attach a script or command that should run when that event fires. Most claude code hooks tutorial setups focus on simple actions first, like linting, formatting, or permission checks. If the hook is not running, verify the event name, file path, and executable permissions on the script.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>Why are my Claude Code hooks not firing?</dt>
+      <dd>Claude Code hooks usually fail to fire because the configured event does not match the actual workflow step, or because the hook command cannot execute in the current environment. In practice, claude code hooks issues often come from wrong paths, missing permissions, or syntax errors in the hook definition. Checking logs and testing the hook command manually is the fastest way to isolate the problem.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What can I use instead of Claude Code hooks?</dt>
+      <dd>Alternatives to Claude Code hooks include shell scripts, Git hooks, CI/CD pipelines, task runners, and external automation tools that run checks outside the Claude Code environment. These options can be better when you need broader team-wide enforcement or more predictable deployment behavior. A claude code hooks tutorial is still useful, though, because hooks are often the quickest way to add local workflow automation.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What is a good practical tip for using Claude Code hooks safely?</dt>
+      <dd>A strong practical tip is to keep each Claude Code hook small, deterministic, and easy to debug instead of building one large script that does everything. In a claude code hooks tutorial, the safest pattern is to start with read-only checks like validation or logging before adding blocking or write actions. That makes failures easier to trace and reduces the risk of unexpected behavior during normal development.</dd>
+    </div>
+      </dl>
+    </section>
     </article>
   </div>
 </body>

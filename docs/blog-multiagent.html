@@ -174,7 +174,7 @@
   "description": "A practical guide to claude code multi-agent setups, why subagents drift, and how AgentCheck adds governance around each independent run.",
   "url": "https://paprika-org.github.io/agentcheck/blog-multiagent.html",
   "datePublished": "2026-04-21",
-  "dateModified": "2026-04-24",
+  "dateModified": "2026-05-05",
   "publisher": {
     "@type": "Organization",
     "name": "agentcheck"
@@ -182,6 +182,63 @@
 }
 </script>
   <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+    <style>
+      .faq { margin-top: 2.5em; border-top: 1px solid var(--border); padding-top: 1.5em; }
+      .faq h2 { font-size: 1.15rem; margin-bottom: 1em; }
+      .faq-list { margin: 0; padding: 0; }
+      .faq-item { margin-bottom: 1.2em; }
+      .faq-item dt { font-weight: 700; color: var(--accent); margin-bottom: 0.3em; }
+      .faq-item dd { margin: 0; color: var(--muted); line-height: 1.65; }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Claude Code multi-agent?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code multi-agent is a workflow where one Claude Code session coordinates multiple specialized agents to handle different tasks in parallel. Instead of one agent doing research, coding, testing, and review sequentially, the work is split across focused subagents. This usually improves speed, keeps context cleaner, and makes larger coding tasks easier to manage."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I use Claude Code multi-agent effectively?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To use Claude Code multi-agent well, start with one orchestrator prompt that defines the goal, then assign narrow roles like researcher, implementer, or tester. Keep each agent's scope specific so they do not overlap or duplicate work. In practice, Claude Code multi-agent performs best when subtasks are independent and the parent agent recombines the results at the end."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Claude Code multi-agent sometimes give inconsistent results?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code multi-agent can produce inconsistent results when subagents get vague instructions, conflicting responsibilities, or incomplete context. Parallel agents may also make different assumptions if the main task is not broken into clearly bounded steps. The fix is usually better orchestration: define expected output, success criteria, and ownership for each agent."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the best alternatives to Claude Code multi-agent?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Alternatives to Claude Code multi-agent include using a single-agent Claude Code workflow for simpler tasks, or switching to other agentic coding systems that support delegation, tool use, and parallel execution. The best choice depends on whether you need speed, tighter control, or lower cost. For many teams, a simpler single-agent setup is better unless the project is complex enough to justify multi-agent coordination."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is a practical tip for getting better results with Claude Code multi-agent?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A practical Claude Code multi-agent tip is to split work by deliverable, not by vague role labels alone. For example, assign one agent to produce a test plan, another to patch a specific module, and another to review the diff against acceptance criteria. That structure reduces collisions, makes outputs easier to verify, and improves the overall quality of multi-agent runs."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <nav>
@@ -288,6 +345,47 @@ sessions:
         <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
       </ul>
     </div>
+    
+    <div class="related-posts" data-generated="build-internal-links" style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);">
+      <h2 style="font-size:1rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.6;margin:0 0 12px;">Related posts</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-parallel-agents.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code parallel agents</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-session-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code session monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-audit-log.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code audit log</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-permissions.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code permissions not working</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code hooks tutorial</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-guardrails.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code guardrails</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code tool use monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-agent-governance.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code agent governance</a></li>
+      </ul>
+    </div>
+    
+    <section class="faq" aria-label="Frequently Asked Questions">
+      <h2>Frequently Asked Questions</h2>
+      <dl class="faq-list">
+    <div class="faq-item">
+      <dt>What is Claude Code multi-agent?</dt>
+      <dd>Claude Code multi-agent is a workflow where one Claude Code session coordinates multiple specialized agents to handle different tasks in parallel. Instead of one agent doing research, coding, testing, and review sequentially, the work is split across focused subagents. This usually improves speed, keeps context cleaner, and makes larger coding tasks easier to manage.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>How do I use Claude Code multi-agent effectively?</dt>
+      <dd>To use Claude Code multi-agent well, start with one orchestrator prompt that defines the goal, then assign narrow roles like researcher, implementer, or tester. Keep each agent's scope specific so they do not overlap or duplicate work. In practice, Claude Code multi-agent performs best when subtasks are independent and the parent agent recombines the results at the end.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>Why does Claude Code multi-agent sometimes give inconsistent results?</dt>
+      <dd>Claude Code multi-agent can produce inconsistent results when subagents get vague instructions, conflicting responsibilities, or incomplete context. Parallel agents may also make different assumptions if the main task is not broken into clearly bounded steps. The fix is usually better orchestration: define expected output, success criteria, and ownership for each agent.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What are the best alternatives to Claude Code multi-agent?</dt>
+      <dd>Alternatives to Claude Code multi-agent include using a single-agent Claude Code workflow for simpler tasks, or switching to other agentic coding systems that support delegation, tool use, and parallel execution. The best choice depends on whether you need speed, tighter control, or lower cost. For many teams, a simpler single-agent setup is better unless the project is complex enough to justify multi-agent coordination.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What is a practical tip for getting better results with Claude Code multi-agent?</dt>
+      <dd>A practical Claude Code multi-agent tip is to split work by deliverable, not by vague role labels alone. For example, assign one agent to produce a test plan, another to patch a specific module, and another to review the diff against acceptance criteria. That structure reduces collisions, makes outputs easier to verify, and improves the overall quality of multi-agent runs.</dd>
+    </div>
+      </dl>
+    </section>
     </article>
   </main>
 

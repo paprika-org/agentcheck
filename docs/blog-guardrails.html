@@ -216,7 +216,7 @@
   "description": "A practical guide to Claude Code guardrails: how to constrain tool use, log every action, and enforce YAML rule packs with agentcheck.",
   "url": "https://paprika-org.github.io/agentcheck/blog-guardrails.html",
   "datePublished": "2026-04-23",
-  "dateModified": "2026-04-24",
+  "dateModified": "2026-05-05",
   "publisher": {
     "@type": "Organization",
     "name": "agentcheck"
@@ -224,6 +224,63 @@
 }
 </script>
   <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+    <style>
+      .faq { margin-top: 2.5em; border-top: 1px solid var(--border); padding-top: 1.5em; }
+      .faq h2 { font-size: 1.15rem; margin-bottom: 1em; }
+      .faq-list { margin: 0; padding: 0; }
+      .faq-item { margin-bottom: 1.2em; }
+      .faq-item dt { font-weight: 700; color: var(--accent); margin-bottom: 0.3em; }
+      .faq-item dd { margin: 0; color: var(--muted); line-height: 1.65; }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Claude Code guardrails?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code guardrails are the rules, hooks, and permission controls that limit what Claude Code can do when it reads files, runs commands, or edits a repo. They are meant to reduce risky actions like destructive shell commands, secret exposure, or unintended file changes. In practice, Claude Code guardrails usually combine prompt instructions with more reliable runtime checks such as hooks or policy-based approvals."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I set up Claude Code guardrails so they actually work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The most reliable way to use Claude Code guardrails is to enforce them at runtime, not just in a prompt or markdown file. Teams usually add pre-tool or shell hooks, restrict dangerous commands, and require approval for writes, network access, or sensitive paths. If your guardrails are only written as instructions, Claude Code may follow them most of the time but they will be easier to bypass."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why do Claude Code guardrails fail or get bypassed?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code guardrails often fail when they depend on natural-language instructions instead of deterministic enforcement. The model can misunderstand scope, generate slightly different commands, or encounter edge cases your static rules did not anticipate. That is why stronger Claude Code guardrails use exact policy matching, approval gates, and audit logs rather than relying on the model to police itself."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the best alternatives to Claude Code guardrails?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Alternatives to Claude Code guardrails include external policy engines, shell wrappers, sandboxing tools, and approval workflows that sit outside the model itself. Some teams use hook-based controls, file-system restrictions, or command firewalls so unsafe actions are blocked before execution. These alternatives are useful when you need stronger guarantees than Claude Code guardrails alone can provide."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is one practical tip for improving Claude Code guardrails?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Start by blocking a small set of high-risk actions such as `rm -rf`, secret reads, production config edits, and unrestricted network calls. Then log every denied or approved action so you can see where Claude Code guardrails are too loose or too noisy. This gives you a practical feedback loop to tighten policies without slowing down normal development work."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <div class="shell">
@@ -394,6 +451,47 @@ rules:
         <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
       </ul>
     </div>
+    
+    <div class="related-posts" data-generated="build-internal-links" style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);">
+      <h2 style="font-size:1rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.6;margin:0 0 12px;">Related posts</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-parallel-agents.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code parallel agents</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-session-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code session monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-audit-log.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code audit log</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-multiagent.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code multi-agent</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-permissions.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code permissions not working</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code hooks tutorial</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code tool use monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-agent-governance.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code agent governance</a></li>
+      </ul>
+    </div>
+    
+    <section class="faq" aria-label="Frequently Asked Questions">
+      <h2>Frequently Asked Questions</h2>
+      <dl class="faq-list">
+    <div class="faq-item">
+      <dt>What is Claude Code guardrails?</dt>
+      <dd>Claude Code guardrails are the rules, hooks, and permission controls that limit what Claude Code can do when it reads files, runs commands, or edits a repo. They are meant to reduce risky actions like destructive shell commands, secret exposure, or unintended file changes. In practice, Claude Code guardrails usually combine prompt instructions with more reliable runtime checks such as hooks or policy-based approvals.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>How do I set up Claude Code guardrails so they actually work?</dt>
+      <dd>The most reliable way to use Claude Code guardrails is to enforce them at runtime, not just in a prompt or markdown file. Teams usually add pre-tool or shell hooks, restrict dangerous commands, and require approval for writes, network access, or sensitive paths. If your guardrails are only written as instructions, Claude Code may follow them most of the time but they will be easier to bypass.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>Why do Claude Code guardrails fail or get bypassed?</dt>
+      <dd>Claude Code guardrails often fail when they depend on natural-language instructions instead of deterministic enforcement. The model can misunderstand scope, generate slightly different commands, or encounter edge cases your static rules did not anticipate. That is why stronger Claude Code guardrails use exact policy matching, approval gates, and audit logs rather than relying on the model to police itself.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What are the best alternatives to Claude Code guardrails?</dt>
+      <dd>Alternatives to Claude Code guardrails include external policy engines, shell wrappers, sandboxing tools, and approval workflows that sit outside the model itself. Some teams use hook-based controls, file-system restrictions, or command firewalls so unsafe actions are blocked before execution. These alternatives are useful when you need stronger guarantees than Claude Code guardrails alone can provide.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What is one practical tip for improving Claude Code guardrails?</dt>
+      <dd>Start by blocking a small set of high-risk actions such as `rm -rf`, secret reads, production config edits, and unrestricted network calls. Then log every denied or approved action so you can see where Claude Code guardrails are too loose or too noisy. This gives you a practical feedback loop to tighten policies without slowing down normal development work.</dd>
+    </div>
+      </dl>
+    </section>
     </article>
 
     <footer>

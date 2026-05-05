@@ -162,7 +162,7 @@
   "description": "Claude Code has no built-in audit log. Here",
   "url": "https://paprika-org.github.io/agentcheck/blog-audit-log.html",
   "datePublished": "2026-04-20",
-  "dateModified": "2026-04-24",
+  "dateModified": "2026-05-05",
   "publisher": {
     "@type": "Organization",
     "name": "agentcheck"
@@ -170,6 +170,63 @@
 }
 </script>
   <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+    <style>
+      .faq { margin-top: 2.5em; border-top: 1px solid var(--border); padding-top: 1.5em; }
+      .faq h2 { font-size: 1.15rem; margin-bottom: 1em; }
+      .faq-list { margin: 0; padding: 0; }
+      .faq-item { margin-bottom: 1.2em; }
+      .faq-item dt { font-weight: 700; color: var(--accent); margin-bottom: 0.3em; }
+      .faq-item dd { margin: 0; color: var(--muted); line-height: 1.65; }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is a Claude Code audit log?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A Claude Code audit log is a record of what the agent did during a coding session, such as tool calls, file changes, commands, and outcomes. Teams use a Claude Code audit log for security reviews, debugging, and compliance because it creates a traceable history of agent activity."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I check or use a Claude Code audit log?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To use a Claude Code audit log effectively, review it by session, timestamp, tool name, and result so you can reconstruct what happened step by step. This makes it easier to investigate unexpected edits, confirm policy enforcement, and export the audit trail for internal review or SIEM tools."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why is my Claude Code audit log missing events or not showing everything?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A Claude Code audit log may miss events if logging hooks were not installed correctly, permissions blocked the logger, or only part of the workflow was being monitored. It can also happen when subagents, external tools, or post-processing steps are not included in the same audit pipeline."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What can I use instead of a Claude Code audit log?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "If you do not have a native Claude Code audit log, alternatives include shell history, Git commits, CI job logs, MCP server logs, or third-party agent monitoring tools. These options can provide partial visibility, but they are usually less complete than a dedicated audit log built for Claude Code activity."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is the best practical tip for Claude Code audit logs?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The most useful practical tip is to filter the Claude Code audit log by time window, session ID, and error status before reading everything line by line. That quickly isolates the relevant actions, reduces noise, and helps you spot the exact command or tool call that caused the issue."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <div class="shell">
@@ -262,6 +319,47 @@
         <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
       </ul>
     </div>
+    
+    <div class="related-posts" data-generated="build-internal-links" style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);">
+      <h2 style="font-size:1rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.6;margin:0 0 12px;">Related posts</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-parallel-agents.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code parallel agents</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-session-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code session monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-multiagent.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code multi-agent</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-permissions.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code permissions not working</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code hooks tutorial</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-guardrails.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code guardrails</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code tool use monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-agent-governance.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code agent governance</a></li>
+      </ul>
+    </div>
+    
+    <section class="faq" aria-label="Frequently Asked Questions">
+      <h2>Frequently Asked Questions</h2>
+      <dl class="faq-list">
+    <div class="faq-item">
+      <dt>What is a Claude Code audit log?</dt>
+      <dd>A Claude Code audit log is a record of what the agent did during a coding session, such as tool calls, file changes, commands, and outcomes. Teams use a Claude Code audit log for security reviews, debugging, and compliance because it creates a traceable history of agent activity.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>How do I check or use a Claude Code audit log?</dt>
+      <dd>To use a Claude Code audit log effectively, review it by session, timestamp, tool name, and result so you can reconstruct what happened step by step. This makes it easier to investigate unexpected edits, confirm policy enforcement, and export the audit trail for internal review or SIEM tools.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>Why is my Claude Code audit log missing events or not showing everything?</dt>
+      <dd>A Claude Code audit log may miss events if logging hooks were not installed correctly, permissions blocked the logger, or only part of the workflow was being monitored. It can also happen when subagents, external tools, or post-processing steps are not included in the same audit pipeline.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What can I use instead of a Claude Code audit log?</dt>
+      <dd>If you do not have a native Claude Code audit log, alternatives include shell history, Git commits, CI job logs, MCP server logs, or third-party agent monitoring tools. These options can provide partial visibility, but they are usually less complete than a dedicated audit log built for Claude Code activity.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What is the best practical tip for Claude Code audit logs?</dt>
+      <dd>The most useful practical tip is to filter the Claude Code audit log by time window, session ID, and error status before reading everything line by line. That quickly isolates the relevant actions, reduces noise, and helps you spot the exact command or tool call that caused the issue.</dd>
+    </div>
+      </dl>
+    </section>
     </article>
 
     <footer>

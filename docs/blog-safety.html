@@ -193,9 +193,66 @@
     }
   </style>
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"Article","headline":"Claude Code safety: practical guardrails, logs, and rule packs for real agent runs","description":"Claude Code safety is mostly about constraining side effects, logging tool use, and enforcing rules before an agent can do damage. This guide shows a practical setup with agentcheck.","url":"https://paprika-org.github.io/agentcheck/blog-safety.html","datePublished":"2026-04-25","dateModified":"2026-04-25","publisher":{"@type":"Organization","name":"agentcheck"}}
+  {"@context":"https://schema.org","@type":"Article","headline":"Claude Code safety: practical guardrails, logs, and rule packs for real agent runs","description":"Claude Code safety is mostly about constraining side effects, logging tool use, and enforcing rules before an agent can do damage. This guide shows a practical setup with agentcheck.","url":"https://paprika-org.github.io/agentcheck/blog-safety.html","datePublished":"2026-04-25","dateModified": "2026-05-05","publisher":{"@type":"Organization","name":"agentcheck"}}
   </script>
   <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+
+    <style>
+      .faq { margin-top: 2.5em; border-top: 1px solid var(--border); padding-top: 1.5em; }
+      .faq h2 { font-size: 1.15rem; margin-bottom: 1em; }
+      .faq-list { margin: 0; padding: 0; }
+      .faq-item { margin-bottom: 1.2em; }
+      .faq-item dt { font-weight: 700; color: var(--accent); margin-bottom: 0.3em; }
+      .faq-item dd { margin: 0; color: var(--muted); line-height: 1.65; }
+    </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Claude Code safety?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code safety refers to the guardrails, permission controls, and review steps used to keep AI-generated coding actions from causing risky changes. In practice, Claude Code safety includes limiting file access, checking commands before execution, and validating outputs in your development workflow. Teams use these controls to reduce security, compliance, and production risks."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I make Claude Code safer to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "To improve Claude Code safety, start by restricting what the agent can read, write, or execute, then require human approval for sensitive actions. You should also test prompts in a non-production environment and log tool usage so unsafe behavior is easier to spot. The safest setup combines permissions, monitoring, and code review rather than relying on prompts alone."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Why does Claude Code safety become a problem in real projects?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Claude Code safety issues usually happen when the model has broad access, unclear instructions, or too much autonomy in a live environment. The agent may follow the prompt correctly but still make harmful assumptions, expose secrets, or modify the wrong files. This is why Claude Code safety depends as much on environment design and policy as on model quality."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What are the alternatives to Claude Code for safer AI coding?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Alternatives to Claude Code for safer AI coding include tools with stricter sandboxing, stronger approval flows, or more detailed audit trails. Some teams also prefer IDE assistants that suggest code without executing commands, because that reduces operational risk. If Claude Code safety is a concern, compare agents based on permissions, logging, isolation, and policy controls rather than raw coding ability."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What is one practical tip for Claude Code safety?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "A practical Claude Code safety tip is to run it with the minimum permissions needed for the task and expand access only when necessary. For example, allow read-only access first, then approve writes or shell commands case by case. This simple least-privilege approach prevents many avoidable mistakes before they become larger issues."
+      }
+    }
+  ]
+}
+</script>
 </head>
 <body>
   <div class="shell">
@@ -360,6 +417,47 @@ jq -r '.tool' .agentcheck/logs/claude.jsonl | sort | uniq -c</code></pre>
         <li><a href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code tool use monitoring</a></li>
       </ul>
     </div>
+    
+    <div class="related-posts" data-generated="build-internal-links" style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);">
+      <h2 style="font-size:1rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.6;margin:0 0 12px;">Related posts</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-parallel-agents.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code parallel agents</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-session-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code session monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-audit-log.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code audit log</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-multiagent.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code multi-agent</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-permissions.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code permissions not working</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code hooks tutorial</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-guardrails.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code guardrails</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code tool use monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-agent-governance.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code agent governance</a></li>
+      </ul>
+    </div>
+    
+    <section class="faq" aria-label="Frequently Asked Questions">
+      <h2>Frequently Asked Questions</h2>
+      <dl class="faq-list">
+    <div class="faq-item">
+      <dt>What is Claude Code safety?</dt>
+      <dd>Claude Code safety refers to the guardrails, permission controls, and review steps used to keep AI-generated coding actions from causing risky changes. In practice, Claude Code safety includes limiting file access, checking commands before execution, and validating outputs in your development workflow. Teams use these controls to reduce security, compliance, and production risks.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>How do I make Claude Code safer to use?</dt>
+      <dd>To improve Claude Code safety, start by restricting what the agent can read, write, or execute, then require human approval for sensitive actions. You should also test prompts in a non-production environment and log tool usage so unsafe behavior is easier to spot. The safest setup combines permissions, monitoring, and code review rather than relying on prompts alone.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>Why does Claude Code safety become a problem in real projects?</dt>
+      <dd>Claude Code safety issues usually happen when the model has broad access, unclear instructions, or too much autonomy in a live environment. The agent may follow the prompt correctly but still make harmful assumptions, expose secrets, or modify the wrong files. This is why Claude Code safety depends as much on environment design and policy as on model quality.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What are the alternatives to Claude Code for safer AI coding?</dt>
+      <dd>Alternatives to Claude Code for safer AI coding include tools with stricter sandboxing, stronger approval flows, or more detailed audit trails. Some teams also prefer IDE assistants that suggest code without executing commands, because that reduces operational risk. If Claude Code safety is a concern, compare agents based on permissions, logging, isolation, and policy controls rather than raw coding ability.</dd>
+    </div>
+    <div class="faq-item">
+      <dt>What is one practical tip for Claude Code safety?</dt>
+      <dd>A practical Claude Code safety tip is to run it with the minimum permissions needed for the task and expand access only when necessary. For example, allow read-only access first, then approve writes or shell commands case by case. This simple least-privilege approach prevents many avoidable mistakes before they become larger issues.</dd>
+    </div>
+      </dl>
+    </section>
     </article>
   </div>
 </body>
