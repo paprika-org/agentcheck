@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Claude Code Output Logging with JSONL Guardrails and Audit Trails</title>
+  <meta name="description" content="A practical guide to claude code output logging using AgentCheck, including installation, JSONL log structure, rule packs, troubleshooting, and realistic limitations.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-output-logging.html">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --links: #7dd3fc;
+      --accent: #f59e0b;
+      --borders: #24304d;
+      --code-bg: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    a { color: var(--links); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    nav {
+      border-bottom: 1px solid var(--borders);
+      background: rgba(11, 16, 32, 0.95);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
+    }
+    .nav-inner, .container {
+      width: min(900px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+    }
+    .brand {
+      font-weight: 700;
+      color: var(--text);
+    }
+    main { padding: 32px 0 56px; }
+    article {
+      background: var(--panel);
+      border: 1px solid var(--borders);
+      border-radius: 16px;
+      padding: 32px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+    }
+    h1, h2, h3 {
+      line-height: 1.25;
+      margin-top: 0;
+    }
+    h1 {
+      font-size: clamp(2rem, 4vw, 2.8rem);
+      margin-bottom: 12px;
+    }
+    h2 {
+      margin-top: 36px;
+      font-size: 1.45rem;
+      color: var(--text);
+      border-top: 1px solid var(--borders);
+      padding-top: 24px;
+    }
+    h3 {
+      margin-top: 22px;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+      color: var(--accent);
+    }
+    p, li { color: var(--text); }
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+    .lead {
+      font-size: 1.05rem;
+    }
+    pre {
+      background: var(--code-bg);
+      color: var(--text);
+      padding: 18px;
+      overflow-x: auto;
+      border: 1px solid var(--borders);
+      border-radius: 12px;
+      font-size: 0.95rem;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    .callout {
+      border-left: 4px solid var(--accent);
+      padding: 14px 16px;
+      background: rgba(245, 158, 11, 0.08);
+      border-radius: 10px;
+      color: var(--text);
+    }
+    .cta {
+      margin-top: 36px;
+      padding: 20px;
+      border: 1px solid var(--borders);
+      border-radius: 14px;
+      background: rgba(125, 211, 252, 0.05);
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Article",
+    "headline":"Claude Code Output Logging with JSONL Guardrails and Audit Trails",
+    "description":"A practical guide to claude code output logging using AgentCheck, including installation, JSONL log structure, rule packs, troubleshooting, and realistic limitations.",
+    "url":"https://paprika-org.github.io/agentcheck/blog-output-logging.html",
+    "datePublished":"2026-05-07",
+    "dateModified":"2026-05-07",
+    "publisher":{"@type":"Organization","name":"agentcheck"}
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"Does AgentCheck capture every Claude Code action?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"It captures tool calls and guardrail decisions made through the wrapped Claude process, but it does not magically record activity that happens outside that wrapper or outside the available hooks."
+        }
+      },
+      {
+        "@type":"Question",
+        "name":"Why use JSONL for logs instead of a single JSON file?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"JSONL is append-friendly, streams well, and is easier to process incrementally with shell tools, SIEM pipelines, or batch jobs without rewriting a large document."
+        }
+      },
+      {
+        "@type":"Question",
+        "name":"Can rule packs prevent dangerous commands?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"Yes, that is the point of the YAML rule packs: they can constrain what the agent is allowed to do and block or flag specific classes of actions before they execute."
+        }
+      },
+      {
+        "@type":"Question",
+        "name":"Is claude code output logging enough for full compliance?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"Usually no. It helps create an audit trail for agent behavior, but compliance programs often also require retention controls, identity mapping, access reviews, and downstream log aggregation."
+        }
+      }
+    ]
+  }
+  </script>
+  <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a class="brand" href="index.html">agentcheck</a>
+      <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+    </div>
+  </nav>
+
+  <main class="container">
+    <article>
+      <h1>Claude Code Output Logging with AgentCheck</h1>
+      <div class="meta">Published May 7, 2026</div>
+
+      <p class="lead">Claude code output logging matters as soon as agents touch a real repository, shell, or deployment path. If you need to answer basic operational questions like “what tool did the agent call,” “what was blocked,” or “which run wrote this file,” plain terminal transcripts are not enough. You need structured logs, consistent wrapping, and some policy layer that can stop obviously bad behavior before it executes.</p>
+
+      <p>That is the problem space <strong>AgentCheck</strong> targets. It is a behavioral governance layer for Claude Code that wraps each Claude process with hook-based guardrails, logs tool calls to JSONL, and enforces YAML rule packs. The practical value is not branding; it is that <em>claude code output logging</em> becomes machine-readable instead of anecdotal. You can grep it, ship it, diff it across runs, and correlate blocked actions with the rules that caused them.</p>
+
+      <h2>Why claude code output logging needs structure</h2>
+      <p>Developers usually start by saving terminal output or relying on CI logs. That works for debugging a single failed run, but it falls apart when you want a durable audit trail. Free-form logs do not reliably tell you which tool was invoked, what arguments were passed, whether the action was allowed, or which policy decision changed the result.</p>
+
+      <p>Structured JSONL solves a narrow but important problem: one event per line, emitted as the run happens, with enough fields to support indexing and post-processing. That keeps logging cheap and composable. You can pipe it into `jq`, upload it to your log system, or write tests against expected event sequences. For claude code output logging, the important property is not prettiness. It is deterministic structure.</p>
+
+      <h2>Installing and wrapping Claude Code</h2>
+      <p>AgentCheck installs as a global npm package from GitHub. The wrapper approach is useful because it does not require patching Claude Code itself. Instead, it sits around the process, attaches hooks, and evaluates rule packs before or after relevant actions. That makes it realistic to adopt in a developer workstation or CI runner without rebuilding your whole toolchain.</p>
+
+      <pre><code>npm install -g github:paprika-org/agentcheck
+
+# Example workflow:
+agentcheck --rules ./rules/repo-safe.yaml --log ./logs/claude-tools.jsonl -- claude
+
+# Example rule pack sketch:
+version: 1
+rules:
+  - id: block-destructive-shell
+    match:
+      tool: shell
+      command_regex: "(rm -rf|git reset --hard)"
+    action: deny
+
+  - id: allow-readonly-git
+    match:
+      tool: shell
+      command_regex: "^git (status|diff|show)"
+    action: allow</code></pre>
+
+      <p>The exact wrapper interface may evolve, but the design is straightforward: start Claude through AgentCheck, point it at a rule pack, and persist logs to a JSONL file. That gives you a repeatable execution boundary. If your team wants different policies for local development versus CI, separate YAML files are a reasonable way to express that without changing application code.</p>
+
+      <h2>What the logs are good for in practice</h2>
+      <p>The strongest use case is replayable investigation. When an agent does something unexpected, you want more than a screenshot or chat summary. You want a list of tool calls with timestamps, arguments, results, and policy outcomes. That lets you distinguish between three different failures: the model made a bad decision, the environment exposed too much capability, or the rules were too weak.</p>
+
+      <p>This is also where <em>claude code output logging</em> becomes useful for teams rather than individuals. JSONL is easy to feed into dashboards or alerting. You can flag patterns like repeated denied shell attempts, writes outside the repo root, or tool usage that drifts over time. None of that requires magical AI observability; it just requires clean events and stable field names.</p>
+
+      <div class="callout">
+        Honest limitation: logging is not sandboxing. A good log tells you what happened and a good rule pack can block known-bad actions, but neither replaces OS-level isolation, permission boundaries, or secret management.
+      </div>
+
+      <h2>Rule packs, enforcement, and realistic limitations</h2>
+      <p>YAML rule packs are attractive because they are reviewable and versionable. They fit normal engineering workflows: code review, branch protection, and environment-specific overrides. For governance, that matters more than having a clever policy DSL. A teammate should be able to read a rule and understand what it blocks.</p>
+
+      <p>That said, rules are only as good as the hook surface and the patterns you define. Regex-based command matching can miss edge cases. A denied shell command does not help if the dangerous action happens through some other allowed tool. Hook-based systems also depend on the process being launched through the wrapper. If someone runs Claude directly, your policy and logging path may be bypassed.</p>
+
+      <p>So the honest positioning is this: AgentCheck improves control and visibility around Claude runs, especially for repositories where you want auditable tool activity. It does not give you complete provenance of everything on the machine, and it does not convert an unsafe execution environment into a safe one by itself.</p>
+
+      <h2>Troubleshooting common mistakes</h2>
+      <p>The first common mistake is treating logs as complete system truth. If you only log wrapped Claude tool calls, you are not capturing unrelated user actions, background jobs, or post-run cleanup scripts. Keep the scope clear so your incident reviews do not overclaim coverage.</p>
+
+      <p>The second mistake is writing permissive rule packs and assuming the log alone is protection. If your policies default to broad shell access and only deny a few obvious commands, the agent may still have enough room to do damage through variants you did not pattern match. Start restrictive, then open capabilities deliberately.</p>
+
+      <p>A third practical issue is forgetting log retention and aggregation. A local JSONL file is useful during development, but if you care about history, route it somewhere durable. Otherwise the answer to “what happened last week” becomes “that runner was recycled.”</p>
+
+      <h2>Frequently Asked Questions</h2>
+      <h3>Does AgentCheck capture every Claude Code action?</h3>
+      <p>It captures tool calls and guardrail decisions made through the wrapped Claude process, but it does not magically record activity that happens outside that wrapper or outside the available hooks.</p>
+
+      <h3>Why use JSONL for logs instead of a single JSON file?</h3>
+      <p>JSONL is append-friendly, streams well, and is easier to process incrementally with shell tools, SIEM pipelines, or batch jobs without rewriting a large document.</p>
+
+      <h3>Can rule packs prevent dangerous commands?</h3>
+      <p>Yes, that is the point of the YAML rule packs: they can constrain what the agent is allowed to do and block or flag specific classes of actions before they execute.</p>
+
+      <h3>Is claude code output logging enough for full compliance?</h3>
+      <p>Usually no. It helps create an audit trail for agent behavior, but compliance programs often also require retention controls, identity mapping, access reviews, and downstream log aggregation.</p>
+
+      <div class="cta">
+        <p>If you need structured <strong>claude code output logging</strong> with enforceable rule packs instead of ad hoc transcripts, review the project and installation details on <a href="https://github.com/paprika-org/agentcheck">GitHub</a>.</p>
+      </div>
+    </article>
+  </main>
+</body>
+</html>
