@@ -218,6 +218,32 @@
         flex-direction: column;
       }
     }
+  
+    .related-posts {
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0 2rem;
+      padding-top: 1.5rem;
+    }
+    .related-posts h2 {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .related-posts ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+    .related-posts li a {
+      color: var(--link);
+      font-size: 0.95rem;
+    }
+
   </style>
   <script type="application/ld+json">
   {
@@ -401,7 +427,16 @@ agentcheck --rules .agentcheck/rules/default.yaml -- claude
       <h3>What are the limitations of a claude code hooks tutorial setup?</h3>
       <p>The biggest limitations are policy quality and environment design. Hooks improve governance, but they do not replace least-privilege credentials, isolated execution, repository protections, or human judgment. Treat them as one layer in a broader control model.</p>
 
-      <div class="hard-cta">
+      
+      <div class="related-posts">
+        <h2>Related Articles</h2>
+        <ul>
+      <li><a href="blog-parallel-agents.html">Claude Code parallel agents</a></li>
+      <li><a href="blog-session-monitoring.html">Claude Code session monitoring</a></li>
+      <li><a href="blog-audit-log.html">Claude Code audit log</a></li>
+        </ul>
+      </div>
+<div class="hard-cta">
         <h2>Get started with agentcheck</h2>
         <p>Install:</p>
         <pre><code>npm install -g github:paprika-org/agentcheck</code></pre>

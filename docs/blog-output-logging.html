@@ -115,6 +115,32 @@
       border-radius: 14px;
       background: rgba(125, 211, 252, 0.05);
     }
+  
+    .related-posts {
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0 2rem;
+      padding-top: 1.5rem;
+    }
+    .related-posts h2 {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .related-posts ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+    .related-posts li a {
+      color: var(--link);
+      font-size: 0.95rem;
+    }
+
   </style>
   <script type="application/ld+json">
   {
@@ -253,7 +279,16 @@ rules:
       <h3>Is claude code output logging enough for full compliance?</h3>
       <p>Usually no. It helps create an audit trail for agent behavior, but compliance programs often also require retention controls, identity mapping, access reviews, and downstream log aggregation.</p>
 
-      <div class="cta">
+      
+      <div class="related-posts">
+        <h2>Related Articles</h2>
+        <ul>
+      <li><a href="blog-parallel-agents.html">Claude Code parallel agents</a></li>
+      <li><a href="blog-session-monitoring.html">Claude Code session monitoring</a></li>
+      <li><a href="blog-audit-log.html">Claude Code audit log</a></li>
+        </ul>
+      </div>
+<div class="cta">
         <p>If you need structured <strong>claude code output logging</strong> with enforceable rule packs instead of ad hoc transcripts, review the project and installation details on <a href="https://github.com/paprika-org/agentcheck">GitHub</a>.</p>
       </div>
     </article>
