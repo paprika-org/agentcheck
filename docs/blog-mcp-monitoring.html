@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude Code MCP Server Monitoring with AgentCheck</title>
+  <meta name="description" content="A practical guide to Claude Code MCP server monitoring using AgentCheck, including installation, rule packs, JSONL logs, and common implementation pitfalls.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/blog-mcp-monitoring.html">
+  <style>
+    :root {
+      --body-bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --links: #7dd3fc;
+      --accent: #f59e0b;
+      --borders: #24304d;
+      --code-bg: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--body-bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    a { color: var(--links); }
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px 56px;
+    }
+    nav {
+      border-bottom: 1px solid var(--borders);
+      background: rgba(11, 16, 32, 0.96);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
+    }
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .nav-inner a {
+      text-decoration: none;
+      font-weight: 600;
+    }
+    header {
+      padding: 40px 0 20px;
+    }
+    h1, h2, h3 {
+      line-height: 1.25;
+      margin-top: 0;
+    }
+    h1 {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+    }
+    h2 {
+      margin-top: 36px;
+      margin-bottom: 12px;
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+    h3 {
+      margin-top: 24px;
+      margin-bottom: 8px;
+      font-size: 1.05rem;
+    }
+    p, li {
+      color: var(--text);
+      margin: 0 0 16px;
+    }
+    .lede {
+      font-size: 1.05rem;
+      color: var(--text);
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--borders);
+      border-radius: 14px;
+      padding: 18px;
+      margin: 24px 0;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--borders);
+      border-radius: 12px;
+      padding: 16px;
+      overflow-x: auto;
+      margin: 18px 0;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    ul {
+      padding-left: 20px;
+      margin: 0 0 16px;
+    }
+    .cta {
+      margin-top: 36px;
+      padding: 20px;
+      background: var(--panel);
+      border: 1px solid var(--borders);
+      border-radius: 14px;
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "Claude Code MCP Server Monitoring with AgentCheck",
+    "description": "A practical guide to Claude Code MCP server monitoring using AgentCheck, including installation, rule packs, JSONL logs, and common implementation pitfalls.",
+    "url": "https://paprika-org.github.io/agentcheck/blog-mcp-monitoring.html",
+    "datePublished": "2026-05-09",
+    "dateModified": "2026-05-09",
+    "publisher": {
+      "@type": "Organization",
+      "name": "agentcheck"
+    }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Does AgentCheck replace an MCP server?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "No. AgentCheck does not implement the MCP protocol or serve tools itself. It wraps Claude Code processes, records tool activity, and enforces local rule packs around the existing agent runtime."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What do you actually get from the logs?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You get JSONL records of tool calls and related execution events. That makes it easier to reconstruct what happened during a session, correlate agent actions with failures, and feed the output into shell scripts or log pipelines."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can rule packs stop dangerous commands?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, within the scope of the wrapped process. Rule packs can constrain actions before they run, but they are not a substitute for operating system isolation, network controls, or repository permissions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this enough for production-grade monitoring?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Usually it is one layer, not the whole stack. For production use, combine AgentCheck with host-level logging, CI policy checks, and access controls so monitoring does not depend on a single wrapper alone."
+        }
+      }
+    ]
+  }
+  </script>
+  <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html">agentcheck</a>
+      <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+    </div>
+  </nav>
+
+  <main class="wrap">
+    <header>
+      <h1>Claude Code MCP Server Monitoring with AgentCheck</h1>
+      <p class="meta">Published 2026-05-09</p>
+    </header>
+
+    <p class="lede">If you need <strong>claude code mcp server monitoring</strong>, the hard part is not collecting more logs. The hard part is seeing what an agent actually did, which tools it called, and whether those calls violated local policy. AgentCheck is a wrapper for Claude Code that adds hook-based guardrails, records tool activity to JSONL, and applies YAML rule packs before actions run. That is useful when you are debugging MCP-connected workflows or trying to keep autonomous coding sessions bounded.</p>
+
+    <h2>Why claude code mcp server monitoring matters</h2>
+    <p>MCP servers widen the runtime surface area of an agent. A session that used to call a shell tool may now read from a database connector, inspect a repo service, or invoke custom internal utilities. For developers, that means failures become harder to reproduce. You need to know whether the bug came from prompt drift, a bad tool response, or an agent making a call it should not have made in the first place.</p>
+    <p>Good claude code mcp server monitoring should answer a few basic questions: which tool was called, with what arguments, in what order, and under which policy. AgentCheck is valuable because it focuses on those behavioral details rather than pretending all agent problems are observability problems. You still need normal system logs, but you also need an execution trail that maps to agent decisions.</p>
+
+    <h2>Install and wrap Claude Code</h2>
+    <p>AgentCheck installs as a global npm package from GitHub. The main operating model is straightforward: wrap the Claude Code process, attach rules, and emit logs in a format that is easy to grep, stream, or archive. JSONL is a practical choice because it works well with command-line tooling and does not require a separate collector just to get started.</p>
+
+    <pre><code>npm install -g github:paprika-org/agentcheck
+
+mkdir -p .agentcheck
+
+cat &gt; .agentcheck/rules.yaml &lt;&lt;'YAML'
+rules:
+  - id: block-destructive-shell
+    match:
+      tool: shell
+      args_regex: "(rm -rf|git reset --hard)"
+    action: deny
+
+  - id: log-mcp-reads
+    match:
+      tool: mcp
+    action: allow
+YAML
+
+agentcheck --rules .agentcheck/rules.yaml -- claude</code></pre>
+
+    <p>The code above is intentionally minimal. In practice, you will want separate rule packs for local development, CI runs, and higher-risk environments. One limitation to state clearly: wrapping a process only governs what happens inside that wrapped execution path. If someone bypasses the wrapper, your monitoring and policy layer does not apply.</p>
+
+    <h2>What AgentCheck gives you for MCP-heavy sessions</h2>
+    <p>For MCP-backed workflows, AgentCheck adds two things that are usually missing from default agent runs: structured evidence and enforceable constraints. The JSONL log provides a sequence of tool events you can inspect after a run. That is enough to build simple incident reviews without adding a full tracing stack.</p>
+    <p>The rule-pack model is equally important. When an agent has access to shell tools and multiple MCP servers, “observe only” is often too weak. You may want to block destructive shell commands, allow read-only MCP calls, or force explicit review before a write path is used. This is where claude code mcp server monitoring becomes governance rather than just telemetry.</p>
+    <p>There are honest limits. AgentCheck does not magically understand the business meaning of every tool payload. If an MCP server exposes a write operation with an innocuous name, your rule pack still needs to classify it correctly. Monitoring quality depends on the clarity of your policies and how consistently the wrapped environment is used.</p>
+
+    <h2>Designing useful rule packs and log workflows</h2>
+    <p>Rule packs should start small. Deny obviously destructive actions, allow read paths, and log everything you are unsure about. Trying to encode a complete security policy on day one usually leads to brittle rules and false positives. For developer teams, a narrow pack that catches the top five dangerous patterns is often more useful than an ambitious pack nobody trusts.</p>
+    <p>For logs, keep them machine-readable and boring. JSONL works because you can inspect single lines during debugging and later ship the same files into a parser or SIEM. A useful pattern is to treat the agent log as an event stream and correlate it with shell history, CI metadata, or host-level audit logs. AgentCheck does not replace those systems; it gives you a behavior-focused layer that normal infrastructure logging usually misses.</p>
+
+    <h2>Common mistakes</h2>
+    <p><strong>Pitfall 1: treating wrapper logs as complete security coverage.</strong> They are not. If a process can run outside AgentCheck, or if another tool path exists that does not pass through the wrapper, you have blind spots. Use OS permissions and environment isolation alongside rule packs.</p>
+    <p><strong>Pitfall 2: writing rules that key only on tool names.</strong> That is often too coarse. A tool called through MCP might support both read and write operations. If your rules do not inspect arguments or operation types, you can accidentally allow more than intended.</p>
+    <p><strong>Pitfall 3: logging everything without retention discipline.</strong> JSONL is easy to produce, which means it is also easy to accumulate sensitive operational detail. Decide early how long logs should live and who can read them.</p>
+
+    <h2>Frequently Asked Questions</h2>
+    <h3>Does AgentCheck replace an MCP server?</h3>
+    <p>No. AgentCheck does not implement the MCP protocol or serve tools itself. It wraps Claude Code processes, records tool activity, and enforces local rule packs around the existing agent runtime.</p>
+
+    <h3>What do you actually get from the logs?</h3>
+    <p>You get JSONL records of tool calls and related execution events. That makes it easier to reconstruct what happened during a session, correlate agent actions with failures, and feed the output into shell scripts or log pipelines.</p>
+
+    <h3>Can rule packs stop dangerous commands?</h3>
+    <p>Yes, within the scope of the wrapped process. Rule packs can constrain actions before they run, but they are not a substitute for operating system isolation, network controls, or repository permissions.</p>
+
+    <h3>Is this enough for production-grade monitoring?</h3>
+    <p>Usually it is one layer, not the whole stack. For production use, combine AgentCheck with host-level logging, CI policy checks, and access controls so monitoring does not depend on a single wrapper alone.</p>
+
+    <div class="cta">
+      <p>If you want a practical starting point for <strong>claude code mcp server monitoring</strong>, inspect the code and examples in the <a href="https://github.com/paprika-org/agentcheck">AgentCheck GitHub repository</a>. The implementation is simple enough to evaluate directly, which is the right standard for a tool that claims to govern agent behavior.</p>
+    </div>
+  </main>
+</body>
+</html>
