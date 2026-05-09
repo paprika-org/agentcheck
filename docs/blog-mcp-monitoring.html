@@ -115,6 +115,32 @@
       border: 1px solid var(--borders);
       border-radius: 14px;
     }
+  
+    .related-posts {
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0 2rem;
+      padding-top: 1.5rem;
+    }
+    .related-posts h2 {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .related-posts ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+    .related-posts li a {
+      color: var(--link);
+      font-size: 0.95rem;
+    }
+
   </style>
   <script type="application/ld+json">
   {
@@ -245,7 +271,16 @@ agentcheck --rules .agentcheck/rules.yaml -- claude</code></pre>
     <h3>Is this enough for production-grade monitoring?</h3>
     <p>Usually it is one layer, not the whole stack. For production use, combine AgentCheck with host-level logging, CI policy checks, and access controls so monitoring does not depend on a single wrapper alone.</p>
 
-    <div class="cta">
+    
+      <div class="related-posts">
+        <h2>Related Articles</h2>
+        <ul>
+      <li><a href="blog-session-monitoring.html">Claude Code session monitoring</a></li>
+      <li><a href="blog-tool-monitoring.html">Claude code tool use monitoring</a></li>
+      <li><a href="blog-parallel-agents.html">Claude Code parallel agents</a></li>
+        </ul>
+      </div>
+<div class="cta">
       <p>If you want a practical starting point for <strong>claude code mcp server monitoring</strong>, inspect the code and examples in the <a href="https://github.com/paprika-org/agentcheck">AgentCheck GitHub repository</a>. The implementation is simple enough to evaluate directly, which is the right standard for a tool that claims to govern agent behavior.</p>
     </div>
   </main>
