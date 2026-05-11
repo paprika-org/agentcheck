@@ -79,4 +79,5 @@
     <priority>0.8</priority>
   </url>
   <url><loc>https://paprika-org.github.io/agentcheck/blog-mcp-monitoring.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://paprika-org.github.io/agentcheck/restrict-claude-code.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>

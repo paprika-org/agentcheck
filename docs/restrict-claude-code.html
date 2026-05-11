@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How to Restrict Claude Code with Hook-Based Guardrails and Auditing</title>
+  <meta name="description" content="Learn how to restrict Claude Code using process-level guardrails, YAML rule packs, and JSONL audit logs with AgentCheck. Includes setup, examples, limits, and troubleshooting.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/restrict-claude-code.html">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --links: #7dd3fc;
+      --accent: #f59e0b;
+      --borders: #24304d;
+      --code-bg: #0f172a;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    a { color: var(--links); }
+    nav {
+      border-bottom: 1px solid var(--borders);
+      background: rgba(11, 16, 32, 0.95);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
+    }
+    .nav-inner, .container {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+    }
+    .brand {
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--text);
+    }
+    .nav-links a {
+      margin-left: 18px;
+      text-decoration: none;
+    }
+    main { padding: 40px 0 64px; }
+    article {
+      background: var(--panel);
+      border: 1px solid var(--borders);
+      border-radius: 18px;
+      padding: 34px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+    }
+    h1, h2, h3 {
+      line-height: 1.25;
+      margin-top: 0;
+    }
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 12px;
+    }
+    h2 {
+      margin-top: 34px;
+      font-size: 1.45rem;
+      color: var(--accent);
+    }
+    h3 {
+      margin-top: 22px;
+      font-size: 1.05rem;
+    }
+    p, li {
+      color: var(--text);
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 24px;
+    }
+    .note {
+      border-left: 3px solid var(--accent);
+      padding: 12px 14px;
+      background: rgba(245, 158, 11, 0.08);
+      color: var(--text);
+      border-radius: 10px;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--borders);
+      border-radius: 14px;
+      padding: 16px;
+      overflow-x: auto;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    ul {
+      padding-left: 20px;
+    }
+    .cta {
+      margin-top: 36px;
+      padding: 18px;
+      border: 1px solid var(--borders);
+      border-radius: 14px;
+      background: rgba(125, 211, 252, 0.06);
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Article",
+    "headline":"How to Restrict Claude Code with Hook-Based Guardrails and Auditing",
+    "description":"Learn how to restrict Claude Code using process-level guardrails, YAML rule packs, and JSONL audit logs with AgentCheck. Includes setup, examples, limits, and troubleshooting.",
+    "url":"https://paprika-org.github.io/agentcheck/restrict-claude-code.html",
+    "datePublished":"2026-05-11",
+    "dateModified":"2026-05-11",
+    "publisher":{"@type":"Organization","name":"agentcheck"}
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"Does AgentCheck sandbox Claude Code by itself?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"No. AgentCheck is a governance layer around Claude Code. It enforces hook-based rules and logs actions, but it does not replace OS sandboxing, container isolation, or repository permissions."
+        }
+      },
+      {
+        "@type":"Question",
+        "name":"Can I restrict network access with AgentCheck?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"You can block or require approval for tool calls that would reach the network if those calls are visible to the hook layer. For hard guarantees, combine AgentCheck with firewall rules, containers, or CI isolation."
+        }
+      },
+      {
+        "@type":"Question",
+        "name":"Why use YAML rule packs instead of prompt instructions alone?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"Prompt instructions are advisory. YAML rule packs are external policy definitions that can be versioned, reviewed, and enforced consistently across sessions, which is better for repeatability and auditability."
+        }
+      },
+      {
+        "@type":"Question",
+        "name":"What do the JSONL logs help with?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"JSONL logs give you a machine-readable history of tool calls and policy decisions. That is useful for incident review, compliance evidence, regression testing, and understanding how an agent behaved over time."
+        }
+      }
+    ]
+  }
+  </script>
+  <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a class="brand" href="index.html">agentcheck</a>
+      <div class="nav-links">
+        <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="container">
+      <article>
+        <h1>How to Restrict Claude Code</h1>
+        <p class="meta">Published May 11, 2026</p>
+
+        <p>If you need to understand <strong>how to restrict Claude Code</strong> in a way that survives prompt drift, the practical answer is to put policy outside the model. Prompt rules are easy to bypass accidentally, especially when an agent is asked to debug, refactor, or execute shell commands under time pressure. A better pattern is a wrapper that intercepts actions, applies explicit rules, and records what happened. That is the problem <code>agentcheck</code> is built to solve: it wraps each Claude process with hook-based guardrails, logs tool calls to JSONL, and applies YAML rule packs to constrain agent behavior.</p>
+
+        <h2>Why Restrict Claude Code at the Process Level</h2>
+        <p>Claude Code is useful precisely because it can take action. It can read files, write files, run commands, and sometimes interact with networked tools. Those capabilities are valuable, but they also create failure modes that are not theoretical:</p>
+        <ul>
+          <li>Agents modifying files outside the intended project scope</li>
+          <li>Shell commands that are too broad, destructive, or expensive</li>
+          <li>Silent tool usage that is hard to audit after the fact</li>
+          <li>Policy enforcement living only in the system prompt</li>
+        </ul>
+        <p>When people ask <strong>how to restrict Claude Code</strong>, they usually mean one of three things: reduce the command surface area, require review for risky actions, and capture evidence of what the agent actually did. Those are governance problems, not just prompting problems.</p>
+
+        <h2>How to Restrict Claude Code with AgentCheck</h2>
+        <p>AgentCheck works as a behavioral control layer. Instead of trusting the agent to always obey natural language instructions, you define rule packs in YAML and let the wrapper enforce them around each Claude process. You also get JSONL logs for tool-level visibility.</p>
+        <p>The basic flow is straightforward: install AgentCheck, define a rule pack that blocks or constrains risky tools, then launch Claude Code through the wrapper. A minimal setup might block dangerous shell patterns, limit write locations, and record every tool call for later review.</p>
+
+        <pre><code>npm install -g github:paprika-org/agentcheck
+
+# example rule pack
+cat &gt; rules.yaml &lt;&lt;'YAML'
+version: 1
+rules:
+  - id: block-destructive-shell
+    match:
+      tool: shell
+      command_regex: '(^|\\s)(rm\\s+-rf|sudo|mkfs|dd\\s+if=)'
+    action: deny
+
+  - id: restrict-write-scope
+    match:
+      tool: write_file
+      path_regex: '^/workspace/project/(src|docs)/'
+    action: allow
+
+  - id: deny-write-outside-scope
+    match:
+      tool: write_file
+    action: deny
+
+  - id: log-everything
+    match:
+      tool: '.*'
+    action: log
+YAML
+
+agentcheck --rules ./rules.yaml -- claude
+</code></pre>
+
+        <p>The exact CLI shape can evolve, so check the repository for current usage, but the model is stable: wrap the agent process, match tool events, and allow, deny, or log based on policy. This is a much stronger answer to <strong>how to restrict Claude Code</strong> than adding another paragraph to a system prompt.</p>
+
+        <h2>What Good Rule Packs Look Like</h2>
+        <p>Start narrow. Most teams make the mistake of writing one giant policy before they know what the agent actually does in daily work. A better approach is to log first, identify the real tool usage patterns, and then tighten rules around the top risks.</p>
+        <p>Useful first rules usually include:</p>
+        <ul>
+          <li>Write restrictions to specific directories such as <code>src/</code> and <code>docs/</code></li>
+          <li>Shell denies for destructive commands and privilege escalation</li>
+          <li>Review gates for package manager changes, migrations, or deployment scripts</li>
+          <li>Logging requirements for every tool call, including denied actions</li>
+        </ul>
+        <p>This approach also keeps policies reviewable in version control. A YAML rule pack is easier to diff, test, and discuss than a pile of hidden prompt instructions spread across local setups.</p>
+
+        <h2>Honest Limitations and Security Boundaries</h2>
+        <p>AgentCheck is a governance layer, not a full sandbox. That distinction matters. If the underlying runtime can still access the network or the filesystem, your hard boundary comes from the operating system, container runtime, CI permissions, or repository ACLs. AgentCheck improves control and auditability, but it should not be described as a substitute for system isolation.</p>
+        <p>There are also practical limits around tool visibility. Enforcement is strongest when the action passes through a hook the wrapper can observe. If a workflow invokes side effects outside that path, you need another control. The right design for sensitive environments is layered:</p>
+        <ul>
+          <li>OS or container isolation for hard boundaries</li>
+          <li>AgentCheck for behavioral policy and logging</li>
+          <li>Repository and secret management for least privilege</li>
+        </ul>
+        <p>That is the technically honest answer to how to restrict Claude Code without overselling what any single tool can guarantee.</p>
+
+        <h2>Common Mistakes</h2>
+        <p><strong>Mistake 1: relying on deny rules without testing normal workflows.</strong> If your rule pack blocks too broadly, developers will route around it. Start by logging, then add targeted denies for verified high-risk patterns. Restrictions only work if the allowed path remains usable.</p>
+        <p><strong>Mistake 2: treating logs as optional.</strong> Without JSONL logs, you lose the ability to answer basic questions after an incident: which tool was invoked, with what arguments, and which rule allowed it. Logging is part of enforcement because it creates accountability and supports rule tuning.</p>
+        <p><strong>Mistake 3: assuming prompt instructions are equivalent to policy.</strong> They are not. The point of an external rule pack is that it remains stable even when the conversation changes.</p>
+
+        <h2>Frequently Asked Questions</h2>
+        <h3>Does AgentCheck sandbox Claude Code by itself?</h3>
+        <p>No. AgentCheck is a governance layer around Claude Code. It enforces hook-based rules and logs actions, but it does not replace OS sandboxing, container isolation, or repository permissions.</p>
+
+        <h3>Can I restrict network access with AgentCheck?</h3>
+        <p>You can block or require approval for tool calls that would reach the network if those calls are visible to the hook layer. For hard guarantees, combine AgentCheck with firewall rules, containers, or CI isolation.</p>
+
+        <h3>Why use YAML rule packs instead of prompt instructions alone?</h3>
+        <p>Prompt instructions are advisory. YAML rule packs are external policy definitions that can be versioned, reviewed, and enforced consistently across sessions, which is better for repeatability and auditability.</p>
+
+        <h3>What do the JSONL logs help with?</h3>
+        <p>JSONL logs give you a machine-readable history of tool calls and policy decisions. That is useful for incident review, compliance evidence, regression testing, and understanding how an agent behaved over time.</p>
+
+        <div class="cta">
+          <p>If you want a concrete starting point for restricting Claude Code with rule packs and audit logs, review the project and examples in the <a href="https://github.com/paprika-org/agentcheck">AgentCheck GitHub repository</a>.</p>
+        </div>
+      </article>
+    </div>
+  </main>
+</body>
+</html>
