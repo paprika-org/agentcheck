@@ -115,6 +115,32 @@
       border-radius: 14px;
       background: rgba(125, 211, 252, 0.06);
     }
+  
+    .related-posts {
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0 2rem;
+      padding-top: 1.5rem;
+    }
+    .related-posts h2 {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .related-posts ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+    .related-posts li a {
+      color: var(--link);
+      font-size: 0.95rem;
+    }
+
   </style>
   <script type="application/ld+json">
   {
@@ -275,10 +301,37 @@ agentcheck --rules ./rules.yaml -- claude
         <h3>What do the JSONL logs help with?</h3>
         <p>JSONL logs give you a machine-readable history of tool calls and policy decisions. That is useful for incident review, compliance evidence, regression testing, and understanding how an agent behaved over time.</p>
 
-        <div class="cta">
+        
+      <div class="related-posts">
+        <h2>Related Articles</h2>
+        <ul>
+      <li><a href="blog-parallel-agents.html">Claude Code parallel agents</a></li>
+      <li><a href="blog-session-monitoring.html">Claude Code session monitoring</a></li>
+      <li><a href="blog-audit-log.html">Claude Code audit log</a></li>
+        </ul>
+      </div>
+<div class="cta">
           <p>If you want a concrete starting point for restricting Claude Code with rule packs and audit logs, review the project and examples in the <a href="https://github.com/paprika-org/agentcheck">AgentCheck GitHub repository</a>.</p>
         </div>
-      </article>
+      
+    <div class="related-posts" data-generated="build-internal-links" style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.1);">
+      <h2 style="font-size:1rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;opacity:.6;margin:0 0 12px;">Related posts</h2>
+      <ul style="list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:8px;">
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-parallel-agents.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code parallel agents</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-session-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code session monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-audit-log.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code audit log</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-multiagent.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code multi-agent</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-permissions.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code permissions not working</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code hooks tutorial</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-guardrails.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code guardrails</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code tool use monitoring</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-safety.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code safety</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-output-logging.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code output logging</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-agent-governance.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code agent governance</a></li>
+        <li><a href="https://paprika-org.github.io/agentcheck/blog-mcp-monitoring.html" style="display:inline-block;padding:4px 12px;border:1px solid rgba(255,255,255,0.15);border-radius:16px;font-size:.875rem;opacity:.8;text-decoration:none;">claude code mcp server monitoring</a></li>
+      </ul>
+    </div>
+    </article>
     </div>
   </main>
 </body>

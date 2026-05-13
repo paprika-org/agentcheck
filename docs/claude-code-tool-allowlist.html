@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude Code Tool Allowlist: Practical Guardrails for Agentic CLI Workflows</title>
+  <meta name="description" content="A technical guide to building a Claude Code tool allowlist with AgentCheck, including install steps, rule pack examples, limitations, common mistakes, and FAQ.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/claude-code-tool-allowlist.html">
+  <style>
+    :root {
+      --body-bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --links: #7dd3fc;
+      --accent: #f59e0b;
+      --borders: #24304d;
+      --code-bg: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: var(--body-bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    a { color: var(--links); }
+    nav {
+      border-bottom: 1px solid var(--borders);
+      background: rgba(11, 16, 32, 0.96);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
+    }
+    .nav-inner, main {
+      width: min(920px, calc(100% - 32px));
+      margin: 0 auto;
+    }
+    .nav-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+    }
+    .brand {
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+    }
+    .nav-links a {
+      margin-left: 18px;
+      text-decoration: none;
+    }
+    main { padding: 40px 0 56px; }
+    article {
+      background: var(--panel);
+      border: 1px solid var(--borders);
+      border-radius: 18px;
+      padding: 32px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+    }
+    h1, h2, h3 {
+      line-height: 1.25;
+      margin-top: 0;
+    }
+    h1 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 12px;
+    }
+    h2 {
+      font-size: 1.45rem;
+      margin-top: 34px;
+      padding-top: 10px;
+      border-top: 1px solid var(--borders);
+    }
+    h3 {
+      font-size: 1.05rem;
+      margin-top: 22px;
+      margin-bottom: 6px;
+      color: var(--accent);
+    }
+    p, li { color: var(--text); }
+    .meta, .muted { color: var(--muted); }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--borders);
+      border-radius: 14px;
+      padding: 18px;
+      overflow-x: auto;
+      color: var(--text);
+      font-size: 0.95rem;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+    .cta {
+      margin-top: 32px;
+      padding: 18px 20px;
+      background: rgba(245, 158, 11, 0.08);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 14px;
+    }
+    ul {
+      padding-left: 20px;
+    }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","headline":"Claude Code Tool Allowlist: Practical Guardrails for Agentic CLI Workflows","description":"A technical guide to building a Claude Code tool allowlist with AgentCheck, including install steps, rule pack examples, limitations, common mistakes, and FAQ.","url":"https://paprika-org.github.io/agentcheck/claude-code-tool-allowlist.html","datePublished":"2026-05-13","dateModified":"2026-05-13","publisher":{"@type":"Organization","name":"agentcheck"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is a Claude Code tool allowlist?","acceptedAnswer":{"@type":"Answer","text":"It is a policy that explicitly defines which Claude Code tools or command patterns are permitted during a session, instead of relying on broad trust."}},{"@type":"Question","name":"Does an allowlist replace code review or sandboxing?","acceptedAnswer":{"@type":"Answer","text":"No. An allowlist reduces agent capabilities, but you still need repository permissions, review processes, and system-level isolation for stronger defense."}},{"@type":"Question","name":"Why use AgentCheck instead of prompt instructions alone?","acceptedAnswer":{"@type":"Answer","text":"Prompt instructions are advisory. AgentCheck enforces rules outside the model by wrapping Claude processes, inspecting tool calls, and logging decisions."}},{"@type":"Question","name":"Can I allow some shell commands but block others?","acceptedAnswer":{"@type":"Answer","text":"Yes. The practical goal is not just tool-level control but narrowing command classes, paths, or behaviors through rule packs and reviewable policy files."}}]}
+  </script>
+  <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a class="brand" href="index.html">agentcheck</a>
+      <div class="nav-links">
+        <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <article>
+      <p class="meta">Published May 13, 2026</p>
+      <h1>Claude Code Tool Allowlist: Practical Guardrails for Agentic CLI Workflows</h1>
+      <p>If you need a <strong>claude code tool allowlist</strong>, the real problem is not syntax, it is control surface. Claude Code can read files, edit files, run commands, and chain actions quickly. That is useful, but it also means one bad prompt, one over-broad shell command, or one mistaken path can create damage faster than a human reviewer can react. A good allowlist narrows the available actions to the minimum set needed for the task and makes those limits enforceable.</p>
+
+      <h2>Why a claude code tool allowlist matters</h2>
+      <p>Most teams start with prompt rules such as “do not touch production files” or “only run tests.” That works until it does not. Prompts are guidance inside the model context. They are not an external enforcement boundary. For developer tooling, you usually want something stronger: a wrapper that can inspect tool calls, reject disallowed actions, and leave an audit trail.</p>
+      <p>That is where AgentCheck fits. It acts as a behavioral governance layer for Claude Code by wrapping each Claude process with hook-based guardrails, logging tool calls to JSONL, and enforcing rule packs defined in YAML. In practice, that lets you move from vague instructions to reviewable policy. A <strong>claude code tool allowlist</strong> becomes a file in version control instead of tribal knowledge.</p>
+
+      <h2>Implementing a claude code tool allowlist with AgentCheck</h2>
+      <p>The simplest pattern is deny by default, then add only the capabilities needed for a specific workflow. For example, if the agent is meant to inspect a repository and run tests, you may allow read operations and a narrow shell subset, but block package installation, networked commands, destructive git actions, and writes outside the repo.</p>
+      <pre><code>npm install -g github:paprika-org/agentcheck
+
+# Example rule pack idea:
+# - allow read-only file inspection
+# - allow specific test commands
+# - deny destructive shell and broad writes
+
+agentcheck --rule-pack ./rules/ci-safe.yaml -- claude
+
+# Example review target:
+# logs/tool-calls.jsonl
+# {"tool":"read_file","path":"src/app.ts","allowed":true}
+# {"tool":"bash","command":"npm test","allowed":true}
+# {"tool":"bash","command":"rm -rf .","allowed":false}</code></pre>
+      <p>The important detail is not the exact YAML shape, which can evolve, but the operating model. Define the policy as code, wrap the agent process, and inspect logs after execution. If an engineer wants to expand the allowed set, they make a policy change and review it like any other code change.</p>
+      <p>This is also more honest than pretending tool-level names are enough. In many cases “bash” is too broad to allow without further constraints. A usable allowlist often needs command-level or path-level rules. Otherwise you have allowed a tool in name while still exposing a large execution surface.</p>
+
+      <h2>What a good allowlist actually restricts</h2>
+      <p>Developers often think in terms of “allow read, block write,” but agent workflows are more granular. A robust allowlist usually covers at least four dimensions.</p>
+      <ul>
+        <li>Tool category: file read, file write, shell, search, networked operations.</li>
+        <li>Path scope: repository root only, selected directories only, or explicit blocklists for secrets and infra folders.</li>
+        <li>Command scope: test runners and linters allowed, package managers and destructive git commands denied.</li>
+        <li>Execution visibility: every call logged with allow or deny status for later review.</li>
+      </ul>
+      <p>That last point matters. Logging is not just for incident response. It also helps tune the policy. If the agent is repeatedly blocked on a legitimate read path or a harmless validation command, the log gives you concrete evidence to refine the rule pack instead of loosening it blindly.</p>
+
+      <h2>Limitations and tradeoffs</h2>
+      <p>A <strong>claude code tool allowlist</strong> is not a complete sandbox. It lowers risk by constraining behavior, but it does not replace operating system permissions, isolated workspaces, or human review. If the underlying environment can still access sensitive files or production credentials, the allowlist is only one layer.</p>
+      <p>There is also a usability tradeoff. Tight policies can slow down development if they are too generic or too strict. Blocking every write except one file path may be safe, but it can make multi-file refactors painful. The practical approach is to create small rule packs per task class: read-only analysis, test-and-fix, docs updates, or controlled refactors.</p>
+      <p>Another limitation is policy drift. If teams keep adding exceptions under deadline pressure, the allowlist becomes noise. Versioning the rules and reviewing them like code is what keeps the system useful.</p>
+
+      <h2>Common mistakes</h2>
+      <p><strong>Mistake 1: Allowing the shell tool without narrowing commands.</strong> “Shell is allowed” is rarely a meaningful safety boundary. If your policy allows arbitrary command execution, your allowlist may be mostly decorative. Restrict to specific commands or patterns that match the task.</p>
+      <p><strong>Mistake 2: Treating logs as optional.</strong> Without JSONL logs, you lose the feedback loop needed to debug policy decisions. When a run fails, you want to know whether the model made a bad choice or the rule pack denied a legitimate operation.</p>
+      <p><strong>Mistake 3: Using one global policy for every workflow.</strong> A read-only auditing session and an automated bug-fix session should not share the same capability profile. Keep rule packs small and purpose-built.</p>
+
+      <h2>Frequently Asked Questions</h2>
+      <h3>What is a Claude Code tool allowlist?</h3>
+      <p>It is a policy that explicitly defines which Claude Code tools or command patterns are permitted during a session, instead of relying on broad trust.</p>
+
+      <h3>Does an allowlist replace code review or sandboxing?</h3>
+      <p>No. An allowlist reduces agent capabilities, but you still need repository permissions, review processes, and system-level isolation for stronger defense.</p>
+
+      <h3>Why use AgentCheck instead of prompt instructions alone?</h3>
+      <p>Prompt instructions are advisory. AgentCheck enforces rules outside the model by wrapping Claude processes, inspecting tool calls, and logging decisions.</p>
+
+      <h3>Can I allow some shell commands but block others?</h3>
+      <p>Yes. The practical goal is not just tool-level control but narrowing command classes, paths, or behaviors through rule packs and reviewable policy files.</p>
+
+      <div class="cta">
+        <p>If you want a reviewable, enforceable approach to Claude Code guardrails, start with AgentCheck and inspect the project here: <a href="https://github.com/paprika-org/agentcheck">github.com/paprika-org/agentcheck</a>.</p>
+      </div>
+    </article>
+  </main>
+</body>
+</html>
