@@ -104,6 +104,32 @@
     ul {
       padding-left: 20px;
     }
+  
+    .related-posts {
+      border-top: 1px solid var(--border);
+      margin: 2.5rem 0 2rem;
+      padding-top: 1.5rem;
+    }
+    .related-posts h2 {
+      font-size: 1.1rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .related-posts ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1.5rem;
+    }
+    .related-posts li a {
+      color: var(--link);
+      font-size: 0.95rem;
+    }
+
   </style>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"Article","headline":"Claude Code Tool Allowlist: Practical Guardrails for Agentic CLI Workflows","description":"A technical guide to building a Claude Code tool allowlist with AgentCheck, including install steps, rule pack examples, limitations, common mistakes, and FAQ.","url":"https://paprika-org.github.io/agentcheck/claude-code-tool-allowlist.html","datePublished":"2026-05-13","dateModified":"2026-05-13","publisher":{"@type":"Organization","name":"agentcheck"}}
@@ -185,7 +211,16 @@ agentcheck --rule-pack ./rules/ci-safe.yaml -- claude
       <h3>Can I allow some shell commands but block others?</h3>
       <p>Yes. The practical goal is not just tool-level control but narrowing command classes, paths, or behaviors through rule packs and reviewable policy files.</p>
 
-      <div class="cta">
+      
+      <div class="related-posts">
+        <h2>Related Articles</h2>
+        <ul>
+      <li><a href="blog-tool-monitoring.html">Claude code tool use monitoring</a></li>
+      <li><a href="blog-parallel-agents.html">Claude Code parallel agents</a></li>
+      <li><a href="blog-session-monitoring.html">Claude Code session monitoring</a></li>
+        </ul>
+      </div>
+<div class="cta">
         <p>If you want a reviewable, enforceable approach to Claude Code guardrails, start with AgentCheck and inspect the project here: <a href="https://github.com/paprika-org/agentcheck">github.com/paprika-org/agentcheck</a>.</p>
       </div>
     </article>
