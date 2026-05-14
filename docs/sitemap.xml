@@ -2,96 +2,96 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://paprika-org.github.io/agentcheck/</loc>
-    <lastmod>2026-04-27</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-index.html</loc>
-    <lastmod>2026-05-09</lastmod>
+    <lastmod>2026-05-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-agent-governance.html</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-audit-log.html</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-guardrails.html</loc>
-    <lastmod>2026-05-08</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-hooks-tutorial.html</loc>
-    <lastmod>2026-05-08</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-mcp-monitoring.html</loc>
-    <lastmod>2026-05-09</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-multiagent.html</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-output-logging.html</loc>
-    <lastmod>2026-05-08</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-parallel-agents.html</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-permissions.html</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-safety.html</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-session-monitoring.html</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://paprika-org.github.io/agentcheck/blog-tool-monitoring.html</loc>
-    <lastmod>2026-05-05</lastmod>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://paprika-org.github.io/agentcheck/restrict-claude-code.html</loc>
-    <lastmod>2026-05-11</lastmod>
+    <loc>https://paprika-org.github.io/agentcheck/claude-code-tool-allowlist.html</loc>
+    <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://paprika-org.github.io/agentcheck/claude-code-tool-allowlist.html</loc>
+    <loc>https://paprika-org.github.io/agentcheck/restrict-claude-code.html</loc>
     <lastmod>2026-05-13</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
