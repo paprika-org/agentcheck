@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Claude Code Prompt Injection: Practical Guardrails for Local Coding Agents</title>
+  <meta name="description" content="A technical guide to claude code prompt injection, including attack paths, practical mitigations, example AgentCheck rules, and common implementation mistakes." />
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/claude-code-prompt-injection.html" />
+  <style>
+    :root {
+      --body-bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --links: #7dd3fc;
+      --accent: #f59e0b;
+      --borders: #24304d;
+      --code-bg: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--body-bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    a { color: var(--links); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px 48px;
+    }
+    nav {
+      border-bottom: 1px solid var(--borders);
+      background: rgba(11, 16, 32, 0.92);
+      position: sticky;
+      top: 0;
+      backdrop-filter: blur(8px);
+    }
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+    .nav-links a { margin-left: 18px; }
+    article {
+      background: var(--panel);
+      border: 1px solid var(--borders);
+      border-radius: 16px;
+      padding: 32px;
+      margin-top: 28px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.22);
+    }
+    h1, h2, h3 {
+      line-height: 1.25;
+      margin-top: 0;
+    }
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 16px;
+    }
+    h2 {
+      font-size: 1.45rem;
+      margin-top: 34px;
+      margin-bottom: 12px;
+      color: var(--accent);
+    }
+    h3 {
+      font-size: 1.05rem;
+      margin-top: 20px;
+      margin-bottom: 8px;
+    }
+    p, li {
+      color: var(--text);
+      margin: 0 0 16px;
+    }
+    .meta {
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 22px;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--borders);
+      border-radius: 12px;
+      padding: 18px;
+      overflow-x: auto;
+      margin: 18px 0 22px;
+    }
+    code, pre code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+    .cta {
+      margin-top: 34px;
+      padding: 20px;
+      border: 1px solid var(--borders);
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.7);
+    }
+    .note {
+      color: var(--muted);
+    }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Article",
+    "headline":"Claude Code Prompt Injection: Practical Guardrails for Local Coding Agents",
+    "description":"A technical guide to claude code prompt injection, including attack paths, practical mitigations, example AgentCheck rules, and common implementation mistakes.",
+    "url":"https://paprika-org.github.io/agentcheck/claude-code-prompt-injection.html",
+    "datePublished":"2026-05-15",
+    "dateModified":"2026-05-15",
+    "publisher":{"@type":"Organization","name":"agentcheck"}
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"What is prompt injection in Claude Code?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"It is when untrusted text in files, tool output, issues, docs, or generated content influences Claude Code to ignore developer intent and perform unsafe actions."
+        }
+      },
+      {
+        "@type":"Question",
+        "name":"Can system prompts alone stop prompt injection?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"No. System prompts help, but they are still text interpreted by the model. Stronger protection requires runtime enforcement around tool use, file access, and network actions."
+        }
+      },
+      {
+        "@type":"Question",
+        "name":"What does AgentCheck add on top of Claude Code?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"AgentCheck wraps each Claude process with hook-based guardrails, logs tool calls to JSONL, and applies YAML rule packs that can block or constrain dangerous behaviors."
+        }
+      },
+      {
+        "@type":"Question",
+        "name":"Is prompt injection fully solvable?",
+        "acceptedAnswer":{
+          "@type":"Answer",
+          "text":"No. The realistic goal is risk reduction: minimize authority, validate critical actions outside the model, and keep auditable logs for review and incident response."
+        }
+      }
+    ]
+  }
+  </script>
+  <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a class="brand" href="index.html">agentcheck</a>
+      <div class="nav-links">
+        <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <article>
+      <h1>Claude Code Prompt Injection: Practical Guardrails for Local Coding Agents</h1>
+      <p class="meta">Published May 15, 2026</p>
+
+      <p>Claude code prompt injection is not a theoretical problem. If your coding agent reads repository files, shell output, issue text, generated docs, or pasted logs, then untrusted content can steer the model into making tool calls you did not intend. For developers, the real question is not whether prompt injection exists, but how much authority the agent has when it encounters hostile instructions embedded in ordinary workflow data.</p>
+
+      <h2>How claude code prompt injection actually happens</h2>
+      <p>The common failure mode is simple: the model consumes text that looks like project context, but the text contains instructions aimed at the agent rather than the human. A malicious README, commit message, test fixture, or stack trace can say things like “ignore previous instructions,” “dump environment variables,” or “edit this config and rerun deployment.” The model has no native, reliable boundary between documentation and adversarial control input.</p>
+      <p>In a local coding workflow, that becomes dangerous because the model is usually connected to tools. Reading a poisoned file is not harmful by itself. The risk appears when the agent can immediately execute shell commands, modify source, fetch URLs, or inspect secrets. That is why claude code prompt injection is mostly an authority problem, not just a prompt design problem.</p>
+
+      <h2>Why prompt hygiene is not enough</h2>
+      <p>Developers often start with stronger system prompts: do not follow instructions from repository files, ask for confirmation before destructive commands, do not reveal secrets, and so on. Those rules are useful, but they are still soft controls. They depend on the same model that is being manipulated to remember and apply them correctly under pressure.</p>
+      <p>A better pattern is to assume the model will eventually misclassify some content. From there, build runtime controls around what the process can do. Limit writable paths. Restrict network destinations. Require approvals for sensitive commands. Log every tool invocation. Put another way: the model can reason, but the wrapper should govern.</p>
+
+      <h2>Using AgentCheck as a behavioral governance layer</h2>
+      <p>AgentCheck is designed for that wrapper role. It sits around each Claude process, applies hook-based guardrails, logs all tool calls to JSONL, and enforces YAML rule packs that constrain agent behavior. This is materially different from adding more prompt text, because the enforcement happens outside the model.</p>
+      <p>A practical setup is to allow low-risk actions by default and explicitly gate high-risk categories such as secret access, recursive deletion, package publishing, or arbitrary outbound network calls. The logs then give you a post-hoc trail when something looks wrong, which is useful both for incident review and for refining rules after near misses.</p>
+
+      <pre><code>npm install -g github:paprika-org/agentcheck
+
+# example rule pack
+version: 1
+rules:
+  - id: block-secrets
+    match:
+      tool: shell
+      command_regex: "(printenv|env|cat .*\\.env|aws sts|gh auth token)"
+    action: deny
+
+  - id: restrict-network
+    match:
+      tool: shell
+      command_regex: "(curl|wget)"
+    action: allow_if
+    condition:
+      working_directory_regex: "^/workspace/"
+
+  - id: log-all-tools
+    match:
+      tool: "*"
+    action: log</code></pre>
+
+      <p>This kind of configuration will not “solve” claude code prompt injection, but it changes the blast radius. If a poisoned markdown file persuades the model to dump credentials or call external endpoints, the wrapper can still block the action. That separation matters.</p>
+
+      <h2>What good defenses look like in practice</h2>
+      <p>Strong defenses follow least privilege. Give the agent access only to the repository it needs, not your entire home directory. Prefer read-heavy workflows to write-anywhere workflows. Isolate credentials from the agent process when possible. If the agent needs a token, scope it narrowly and rotate it often.</p>
+      <p>Second, validate critical actions outside the model. For example, a CI release step should check branch, tag, artifact provenance, and target registry independently. A model saying “publish now” should never be the final authority. The same applies to file operations: if deleting generated files is expected, codify which paths are allowed instead of trusting intent recognition.</p>
+      <p>Third, keep logs that are easy to diff and audit. JSONL tool-call traces are useful because they show sequence, arguments, and timing. When a run behaves oddly, you want to inspect concrete operations, not guess from chat history.</p>
+
+      <h2>Common mistakes</h2>
+      <p><strong>Mistake 1:</strong> treating prompt injection as only a remote-web problem. In practice, local repositories are full of untrusted text: third-party examples, copied issue threads, vendored code, generated artifacts, and even AI-produced patches. Local context is still attacker-controlled context.</p>
+      <p><strong>Mistake 2:</strong> allowing broad shell access and hoping confirmation prompts are enough. If your workflow normalizes “yes” clicks, an injected sequence can still push the operator toward approving unsafe commands. Hard denials for known-dangerous patterns are more reliable than human vigilance.</p>
+      <p><strong>Mistake 3:</strong> logging too little. If you only keep the final patch, you lose visibility into failed attempts, blocked actions, and suspicious command patterns. Those traces are exactly what help you tune rule packs.</p>
+
+      <h2>Frequently Asked Questions</h2>
+      <h3>What is prompt injection in Claude Code?</h3>
+      <p>It is when untrusted text in files, tool output, issues, docs, or generated content influences Claude Code to ignore developer intent and perform unsafe actions.</p>
+
+      <h3>Can system prompts alone stop prompt injection?</h3>
+      <p>No. System prompts help, but they are still text interpreted by the model. Stronger protection requires runtime enforcement around tool use, file access, and network actions.</p>
+
+      <h3>What does AgentCheck add on top of Claude Code?</h3>
+      <p>AgentCheck wraps each Claude process with hook-based guardrails, logs tool calls to JSONL, and applies YAML rule packs that can block or constrain dangerous behaviors.</p>
+
+      <h3>Is prompt injection fully solvable?</h3>
+      <p>No. The realistic goal is risk reduction: minimize authority, validate critical actions outside the model, and keep auditable logs for review and incident response.</p>
+
+      <h2>Bottom line</h2>
+      <p>If you are using coding agents seriously, you should assume claude code prompt injection will happen eventually. The engineering response is straightforward: reduce privilege, externalize enforcement, and keep high-quality logs. Prompt wording still matters, but it should be the first layer, not the only one.</p>
+      <p class="cta">If you want a concrete starting point, inspect and try <a href="https://github.com/paprika-org/agentcheck">AgentCheck on GitHub</a>. It is a practical way to add rule-based guardrails and auditability around Claude Code without pretending the model can police itself.</p>
+      <p class="note">Canonical URL: https://paprika-org.github.io/agentcheck/claude-code-prompt-injection.html</p>
+    </article>
+  </div>
+</body>
+</html>
