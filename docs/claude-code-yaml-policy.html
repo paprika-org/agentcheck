@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Claude Code YAML Policy: Practical Guardrails for Tool Use and Agent Behavior</title>
+  <meta name="description" content="A practical guide to building a Claude Code YAML policy, enforcing tool restrictions, and auditing agent behavior with AgentCheck.">
+  <link rel="canonical" href="https://paprika-org.github.io/agentcheck/claude-code-yaml-policy.html">
+  <style>
+    :root {
+      --bg: #0b1020;
+      --panel: #121a2f;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --links: #7dd3fc;
+      --accent: #f59e0b;
+      --borders: #24304d;
+      --code-bg: #0f172a;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+    a { color: var(--links); }
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 20px 56px;
+    }
+    nav {
+      border-bottom: 1px solid var(--borders);
+      background: rgba(11, 16, 32, 0.92);
+    }
+    .nav-inner {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .nav-inner a {
+      text-decoration: none;
+      font-weight: 600;
+    }
+    article {
+      margin-top: 28px;
+      background: var(--panel);
+      border: 1px solid var(--borders);
+      border-radius: 16px;
+      padding: 32px;
+    }
+    h1, h2, h3 {
+      line-height: 1.25;
+      margin-top: 0;
+    }
+    h1 {
+      font-size: 2.3rem;
+      margin-bottom: 18px;
+    }
+    h2 {
+      font-size: 1.45rem;
+      margin-top: 34px;
+      margin-bottom: 14px;
+      color: var(--accent);
+    }
+    h3 {
+      font-size: 1.05rem;
+      margin-top: 22px;
+      margin-bottom: 8px;
+    }
+    p, li {
+      color: var(--text);
+      margin: 0 0 16px;
+    }
+    .lede {
+      color: var(--muted);
+      font-size: 1.05rem;
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--borders);
+      border-radius: 12px;
+      padding: 18px;
+      overflow-x: auto;
+      margin: 18px 0 22px;
+    }
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.95rem;
+    }
+    .note {
+      border-left: 4px solid var(--accent);
+      padding: 12px 14px;
+      background: rgba(245, 158, 11, 0.08);
+      margin: 18px 0;
+    }
+    .cta {
+      margin-top: 34px;
+      padding: 20px;
+      background: var(--code-bg);
+      border: 1px solid var(--borders);
+      border-radius: 12px;
+    }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","headline":"Claude Code YAML Policy: Practical Guardrails for Tool Use and Agent Behavior","description":"A practical guide to building a Claude Code YAML policy, enforcing tool restrictions, and auditing agent behavior with AgentCheck.","url":"https://paprika-org.github.io/agentcheck/claude-code-yaml-policy.html","datePublished":"2026-05-17","dateModified":"2026-05-17","publisher":{"@type":"Organization","name":"agentcheck"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[{"@type":"Question","name":"What is a Claude Code YAML policy?","acceptedAnswer":{"@type":"Answer","text":"It is a YAML rule pack that defines what a Claude Code session may do, such as allowing or denying tools, constraining paths, and enforcing behavioral checks through a wrapper like AgentCheck."}},{"@type":"Question","name":"Does a YAML policy replace sandboxing?","acceptedAnswer":{"@type":"Answer","text":"No. A YAML policy is an application-layer control. It complements OS sandboxing, container restrictions, and repository permissions, but it should not be treated as a kernel-level security boundary."}},{"@type":"Question","name":"Can I audit what the agent actually did?","acceptedAnswer":{"@type":"Answer","text":"Yes. AgentCheck logs tool calls to JSONL, which makes it easier to review command history, file access, and enforcement outcomes after a run."}},{"@type":"Question","name":"What are the limits of policy-based control?","acceptedAnswer":{"@type":"Answer","text":"Policies can constrain the wrapper-visible actions, but they cannot fix unsafe host configuration, overbroad credentials, or tools that themselves have too much authority."}}]}
+  </script>
+  <script data-goatcounter="https://paprika-lab.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
+</head>
+<body>
+  <nav>
+    <div class="nav-inner">
+      <a href="index.html">agentcheck</a>
+      <a href="https://github.com/paprika-org/agentcheck">GitHub</a>
+    </div>
+  </nav>
+
+  <div class="wrap">
+    <article>
+      <h1>Claude Code YAML Policy: Practical Guardrails for Tool Use and Agent Behavior</h1>
+      <p class="lede">A <strong>claude code yaml policy</strong> is useful when you want reproducible restrictions on what an agent can do, not just a prompt asking it to behave. If your workflow includes shell access, file writes, or network-capable tools, policy needs to live outside the model. That is the gap AgentCheck targets: it wraps each Claude process with hook-based guardrails, logs tool calls to JSONL, and enforces YAML rule packs that constrain behavior.</p>
+
+      <h2>Why a Claude Code YAML Policy Matters</h2>
+      <p>Prompt instructions are soft control. They are easy to bypass accidentally, hard to audit, and difficult to review in code. A policy file is different: it can be versioned, diffed, code-reviewed, and pinned to a repository. For teams running agents in CI, release automation, or internal developer tooling, that difference matters.</p>
+      <p>The practical value of a <strong>claude code yaml policy</strong> is that it moves governance into configuration. Instead of hoping the model avoids dangerous commands, you define what is denied, what is allowed, and what gets logged. That gives you deterministic constraints around behaviors like writing outside the repo, running destructive shell commands, or invoking tools you do not want in a given environment.</p>
+      <p>This is not a magic security boundary. Policy wrappers are strongest when paired with ordinary hardening: least-privilege credentials, container isolation, read-only mounts where possible, and narrow CI tokens. Still, YAML policy is the missing middle layer between “trust the prompt” and “lock down the entire machine.”</p>
+
+      <h2>Installing AgentCheck and Defining a Policy</h2>
+      <p>AgentCheck is distributed as a global npm install from GitHub. The main idea is simple: install the wrapper, define a rule pack in YAML, and run Claude Code through that wrapper so every tool call is checked and logged.</p>
+
+      <pre><code>npm install -g github:paprika-org/agentcheck
+
+# example rule pack
+cat &gt; policy.yaml &lt;&lt;'YAML'
+name: repo-safe
+rules:
+  - id: deny-destructive-shell
+    match:
+      tool: shell
+      command_regex: '(rm -rf|sudo|chmod 777)'
+    action: deny
+
+  - id: allow-readme-edit
+    match:
+      tool: write_file
+      path_regex: '^docs/|^README\.md$'
+    action: allow
+
+  - id: deny-outside-workspace
+    match:
+      tool: write_file
+      path_regex: '^/|^\.\./'
+    action: deny
+YAML
+
+# illustrative invocation; adjust to your local workflow
+agentcheck --policy ./policy.yaml -- claude</code></pre>
+
+      <p>The exact schema and invocation details should come from the project docs, but the pattern is clear. A rule pack matches on tool metadata such as tool name, command text, or path, then applies an action. The useful part is not just blocking. Logging every checked call into JSONL means you can inspect what the agent attempted, what matched, and what was denied.</p>
+
+      <h2>How to Structure a Useful Claude Code YAML Policy</h2>
+      <p>Start with behavior categories instead of individual commands. Most teams care about four things: shell execution, filesystem writes, network access, and secret exposure. Model your rules around those categories. That keeps the policy readable and reduces the chance of accidental gaps.</p>
+      <p>A good first version usually denies obviously destructive shell patterns, restricts writes to the repository or a specific subdirectory, and logs everything. After that, tighten based on real audit data. If agents only need to modify <code>src/</code> and <code>tests/</code>, do not allow broad writes elsewhere. If package installation is only acceptable in ephemeral CI, keep it disabled locally.</p>
+      <p>Prefer narrow allow rules over giant deny lists. Deny lists are brittle because they try to enumerate bad behavior. Allow rules are easier to reason about: “the agent may edit files under these paths and run these commands.” The more privileged the environment, the more this matters.</p>
+      <div class="note">
+        Policy should fail closed where practical. If your wrapper supports it, unmatched tool calls should be denied or at least surfaced loudly in logs.
+      </div>
+
+      <h2>Honest Limitations and Operational Tradeoffs</h2>
+      <p>A <strong>claude code yaml policy</strong> is enforcement around visible tool calls, not a formal proof of safety. If the host process already has broad credentials or the wrapper sees only part of the execution graph, policy cannot compensate for that. Likewise, regex-heavy rule packs can become fragile if you overfit them to command strings instead of modeling intent.</p>
+      <p>There is also a developer-experience tradeoff. Tight policies reduce risk, but they also create friction when legitimate work expands. Expect a tuning period. In practice, teams should treat policy changes the same way they treat CI or deployment rule changes: review them, test them, and keep them small.</p>
+      <p>Another limitation is semantic ambiguity. A rule can block <code>rm -rf</code>, but it may not understand whether a harmless-looking script indirectly performs the same action. That is why policy should be layered with operating-system controls and careful tool design. AgentCheck gives you a behavioral governance layer, not a replacement for system security.</p>
+
+      <h2>Common Mistakes</h2>
+      <p>The first common mistake is writing a policy that only denies a few scary commands and assumes the rest is safe. That leaves a large implicit allow surface. If you care about control, start from what the agent actually needs and permit only that.</p>
+      <p>The second mistake is ignoring logs after adding enforcement. JSONL logging is not just an audit artifact for incidents; it is how you discover noisy rules, accidental denies, and privilege you forgot to remove. Without reviewing real tool-call data, policy quality stagnates.</p>
+      <p>A third pitfall is treating path regexes casually. Overbroad expressions can allow writes outside intended directories or fail on relative-path edge cases. Test policies against representative commands before you rely on them.</p>
+
+      <h2>Frequently Asked Questions</h2>
+      <h3>What is a Claude Code YAML policy?</h3>
+      <p>It is a YAML rule pack that defines what a Claude Code session may do, such as allowing or denying tools, constraining paths, and enforcing behavioral checks through a wrapper like AgentCheck.</p>
+      <h3>Does a YAML policy replace sandboxing?</h3>
+      <p>No. A YAML policy is an application-layer control. It complements OS sandboxing, container restrictions, and repository permissions, but it should not be treated as a kernel-level security boundary.</p>
+      <h3>Can I audit what the agent actually did?</h3>
+      <p>Yes. AgentCheck logs tool calls to JSONL, which makes it easier to review command history, file access, and enforcement outcomes after a run.</p>
+      <h3>What are the limits of policy-based control?</h3>
+      <p>Policies can constrain the wrapper-visible actions, but they cannot fix unsafe host configuration, overbroad credentials, or tools that themselves have too much authority.</p>
+
+      <div class="cta">
+        <p>If you need a concrete starting point for a <strong>claude code yaml policy</strong>, review the project and adapt its rule-pack approach to your repository and runtime assumptions. See the code and installation details on <a href="https://github.com/paprika-org/agentcheck">GitHub</a>.</p>
+      </div>
+    </article>
+  </div>
+</body>
+</html>
